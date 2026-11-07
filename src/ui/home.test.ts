@@ -1,0 +1,42 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { STOPS } from '../journey/stops';
+
+const navigateTo = vi.hoisted(() => vi.fn());
+vi.mock('../core/router', () => ({ navigateTo }));
+vi.mock('../core/voice', () => ({ speakInterrupting: vi.fn(() => Promise.resolve()) }));
+
+import { setLanguage } from '../core/i18n';
+import { initHome } from './home';
+
+describe('home road', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '<div id="home" class="screen"></div>';
+    navigateTo.mockClear();
+    initHome();
+  });
+
+  it('shows one open stop per game, in road order', () => {
+    const buttons = [...document.querySelectorAll<HTMLButtonElement>('.stop-button')];
+    expect(buttons.map((button) => button.dataset.game)).toEqual(STOPS.map((stop) => stop.game));
+    expect(buttons.every((button) => !button.disabled)).toBe(true);
+    expect(document.querySelector('.stop.locked')).toBeNull();
+  });
+
+  it('opens the game when its stop is tapped', () => {
+    document.querySelector<HTMLButtonElement>('.stop-button[data-game="colors"]')!.click();
+    expect(navigateTo).toHaveBeenCalledWith('colors');
+  });
+
+  it('does not open the game when the speaker is tapped', () => {
+    document.querySelector<HTMLButtonElement>('.stop-speaker')!.click();
+    expect(navigateTo).not.toHaveBeenCalled();
+  });
+
+  it('redraws the road in the other language', () => {
+    const before = document.querySelector('.stop-button .gname')!.textContent;
+    setLanguage('en');
+    expect(document.querySelectorAll('.stop-button')).toHaveLength(STOPS.length);
+    expect(document.querySelector('.stop-button .gname')!.textContent).not.toBe(before);
+    setLanguage('he');
+  });
+});

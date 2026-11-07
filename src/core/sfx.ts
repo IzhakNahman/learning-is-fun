@@ -1,0 +1,55 @@
+/** Short sound effects made with Web Audio (no files needed). */
+
+let audioContext: AudioContext | null = null;
+
+/** Browsers only allow audio after a tap or key press, so this runs on the first one. */
+export function unlockAudio(): void {
+  if (!audioContext) {
+    try {
+      audioContext = new AudioContext();
+    } catch {
+      return;
+    }
+  }
+  if (audioContext.state === 'suspended') void audioContext.resume();
+}
+
+function playTone(
+  frequency: number,
+  seconds: number,
+  type: OscillatorType,
+  volume: number,
+  delaySeconds = 0,
+): void {
+  if (!audioContext) return;
+  try {
+    const oscillator = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    const start = audioContext.currentTime + delaySeconds;
+    oscillator.type = type;
+    oscillator.frequency.value = frequency;
+    gain.gain.setValueAtTime(volume, start);
+    gain.gain.exponentialRampToValueAtTime(0.001, start + seconds);
+    oscillator.connect(gain);
+    gain.connect(audioContext.destination);
+    oscillator.start(start);
+    oscillator.stop(start + seconds + 0.02);
+  } catch {
+    // A missed sound effect is harmless.
+  }
+}
+
+export const playSwingSound = (): void => playTone(220, 0.06, 'triangle', 0.12);
+export const playHitSound = (): void => playTone(120, 0.12, 'square', 0.2);
+export const playBreakSound = (): void =>
+  [523, 659, 784].forEach((frequency, index) =>
+    playTone(frequency, 0.18, 'triangle', 0.18, index * 0.07),
+  );
+export const playWrongLetterSound = (): void => playTone(150, 0.3, 'sawtooth', 0.12);
+export const playCelebrationSound = (): void =>
+  [523, 659, 784, 1047].forEach((frequency, index) =>
+    playTone(frequency, 0.25, 'triangle', 0.2, index * 0.1),
+  );
+export const playCountBlip = (step: number): void =>
+  playTone(400 + step * 25, 0.08, 'triangle', 0.12);
+export const playTapBlip = (step: number): void => playTone(500 + step * 30, 0.1, 'triangle', 0.15);

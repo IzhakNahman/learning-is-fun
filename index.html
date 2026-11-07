@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#6ec6ff" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icon-192.png" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
+    <title>לומדים בכיף</title>
+  </head>
+  <body>
+    <div id="home" class="screen"></div>
+
+    <div id="numbers" class="screen pastel hidden">
+      <button class="homebtn" data-home>🏠</button>
+      <div class="split">
+        <div class="grid" id="ngrid"></div>
+        <div class="detail">
+          <div class="bignum" id="nbig"></div>
+          <div class="nname" id="nname"></div>
+          <div class="balls" id="nballs"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="letters" class="screen pastel hidden">
+      <button class="homebtn" data-home>🏠</button>
+      <div class="split">
+        <div class="grid" id="lgrid"></div>
+        <div class="detail">
+          <div class="lbig" id="lbig"></div>
+          <div class="lname" id="lname"></div>
+          <div class="lsnd" id="lsnd"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="colors" class="screen pastel hidden">
+      <button class="homebtn" data-home>🏠</button>
+      <div class="split">
+        <div class="grid" id="cgrid"></div>
+        <div class="detail">
+          <div class="cbig" id="cbig"></div>
+          <div class="cname" id="cname"></div>
+          <div class="cexample" id="cexample"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="words" class="screen pastel hidden">
+      <button class="homebtn" data-home>🏠</button>
+      <div class="split"><div class="grid" id="wgrid"></div></div>
+      <div id="wdetail">
+        <div class="wemo" id="wemo"></div>
+        <div class="steps">
+          <div class="step" id="st1"><small></small><span></span></div>
+          <div class="step" id="st2"><small></small><span></span></div>
+          <div class="step" id="st3"><small></small><span></span></div>
+          <div class="step" id="st4"><small></small><span></span></div>
+        </div>
+        <div class="row2">
+          <button class="btn" id="wreplay">🔁</button>
+          <button class="btn" id="wclose">✖</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="sky" class="screen hidden">
+      <canvas id="c"></canvas>
+      <div id="skyhud">
+        <button id="quit"></button>
+        <div id="timer"></div>
+        <div id="score"></div>
+        <div id="word"></div>
+        <div id="side"></div>
+        <div id="joy">
+          <div id="knob"></div>
+          <small>WASD</small>
+        </div>
+        <button id="punch">👊<small>K</small></button>
+      </div>
+      <div class="ov" id="pop"></div>
+      <div class="ov" id="end"></div>
+      <button id="skyhome" aria-label="Home">🏠</button>
+      <div id="rotate">
+        <div class="rotate-icon">📱↻</div>
+        <div id="rotateText"></div>
+      </div>
+    </div>
+
+    <div id="about"></div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
