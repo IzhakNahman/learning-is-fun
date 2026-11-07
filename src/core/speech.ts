@@ -17,14 +17,38 @@ let speechUnlocked = false;
 
 const isSpeechSupported = (): boolean => 'speechSynthesis' in window;
 
+/** Words in a voice name that usually mean a clearer, more natural voice. */
+const BETTER_VOICE_HINTS = ['enhanced', 'premium', 'neural', 'natural', 'google'];
+/** Hebrew voices known to read niqqud well (iPhone "Carmit", Android "Google עברית"). */
+const KNOWN_GOOD_HEBREW = ['carmit', 'עברית'];
+
+function voiceScore(voice: SpeechSynthesisVoice, speechLang: string): number {
+  const name = voice.name.toLowerCase();
+  let score = 0;
+  if (voice.lang.toLowerCase().replace('_', '-') === speechLang.toLowerCase()) score += 4;
+  if (BETTER_VOICE_HINTS.some((hint) => name.includes(hint))) score += 2;
+  if (KNOWN_GOOD_HEBREW.some((hint) => name.includes(hint))) score += 2;
+  if (name.includes('compact')) score -= 1;
+  if (voice.localService) score += 1;
+  return score;
+}
+
 export function findVoiceFor(speechLang: string): SpeechSynthesisVoice | null {
   if (!isSpeechSupported()) return null;
   const languagePrefix = speechLang.slice(0, 2).toLowerCase();
-  const voices = speechSynthesis.getVoices();
-  const exact = voices.find((voice) => voice.lang.toLowerCase() === speechLang.toLowerCase());
-  return (
-    exact ?? voices.find((voice) => voice.lang.toLowerCase().startsWith(languagePrefix)) ?? null
-  );
+  const matching = speechSynthesis
+    .getVoices()
+    .filter((voice) => voice.lang.toLowerCase().replace('_', '-').startsWith(languagePrefix));
+  let best: SpeechSynthesisVoice | null = null;
+  let bestScore = -Infinity;
+  for (const voice of matching) {
+    const score = voiceScore(voice, speechLang);
+    if (score > bestScore) {
+      best = voice;
+      bestScore = score;
+    }
+  }
+  return best;
 }
 
 /**

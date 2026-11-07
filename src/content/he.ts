@@ -86,7 +86,8 @@ function word(id: string, plain: string, shown: string, emoji: string): WordEntr
   }
   const firstSlot = slots[0];
   if (!firstSlot) throw new Error(`Hebrew word "${id}" is empty`);
-  return { id, startKey: firstSlot.key, shown, speech: plain.replaceAll(DAGESH, ''), emoji, slots };
+  // Spoken with niqqud (the same text as `shown`) so the device voice does not guess the vowels.
+  return { id, startKey: firstSlot.key, shown, speech: shown, emoji, slots };
 }
 
 const words: WordEntry[] = [

@@ -11,6 +11,7 @@
     "lint": "eslint src scripts",
     "format": "prettier --write src scripts",
     "recording-lists": "tsx scripts/recording-lists.ts",
+    "voicelab": "tsx scripts/voicelab.ts",
     "check": "npm run typecheck && npm run lint && npm test"
   },
   "devDependencies": {
