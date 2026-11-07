@@ -235,6 +235,13 @@ const ui: UiText = {
     words: 'Word Treasure',
     sky: 'Word Game',
   },
+  gameNameSpeech: {
+    numbers: 'Meet the Numbers',
+    letters: 'Meet the Letters',
+    colors: 'Meet the Colours',
+    words: 'Word Treasure',
+    sky: 'Word Game',
+  },
   numbers: { placeholder: 'Tap a number', placeholderSpeech: 'Tap a number' },
   colors: { placeholder: 'Tap a colour', placeholderSpeech: 'Tap a colour' },
   letters: {

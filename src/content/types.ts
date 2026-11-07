@@ -79,6 +79,8 @@ export interface UiText {
   aboutButton: string;
   credit: string;
   gameNames: Record<GameId, string>;
+  /** How each game name is spoken (Hebrew: with niqqud). */
+  gameNameSpeech: Record<GameId, string>;
   numbers: { placeholder: string; placeholderSpeech: string };
   colors: { placeholder: string; placeholderSpeech: string };
   letters: {

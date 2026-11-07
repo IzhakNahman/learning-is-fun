@@ -114,3 +114,15 @@ describe('colour data', () => {
     );
   });
 });
+
+describe('Hebrew speech has niqqud', () => {
+  it('every spoken Hebrew word carries niqqud (the device voice would guess otherwise)', () => {
+    const hasNiqqud = /[ְ-ׇ]/;
+    const isHebrewWord = /[א-ת]/;
+    for (const item of listRecordingItems(packs.he)) {
+      for (const word of item.speech.split(/\s+/).filter((part) => isHebrewWord.test(part))) {
+        expect(hasNiqqud.test(word), `${item.clipId}: ${word}`).toBe(true);
+      }
+    }
+  });
+});

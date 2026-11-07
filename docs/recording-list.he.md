@@ -7,11 +7,11 @@ and list the ids in public/audio/he/manifest.json. Clips that are missing fall b
 
 | clip id | say |
 |---|---|
-| game-name-numbers | הכרת המספרים |
-| game-name-letters | הכרת האותיות |
-| game-name-colors | הכרת הצבעים |
-| game-name-words | אוצר מילים |
-| game-name-sky | משחק המילים |
+| game-name-numbers | הֶכֵּרַת הַמִּסְפָּרִים |
+| game-name-letters | הֶכֵּרַת הָאוֹתִיּוֹת |
+| game-name-colors | הֶכֵּרַת הַצְּבָעִים |
+| game-name-words | אוֹצַר מִלִּים |
+| game-name-sky | מִשְׂחַק הַמִּלִּים |
 
 ## letter names
 
@@ -42,7 +42,7 @@ and list the ids in public/audio/he/manifest.json. Clips that are missing fall b
 | letter-name-resh | רֵישׁ |
 | letter-name-shin | שִׁין |
 | letter-name-tav | תָּו |
-| letter-final | סופית |
+| letter-final | סוֹפִית |
 
 ## letter sounds
 
@@ -107,28 +107,28 @@ and list the ids in public/audio/he/manifest.json. Clips that are missing fall b
 
 | clip id | say |
 |---|---|
-| word-aryeh | אריה |
-| word-bayit | בית |
-| word-gamal | גמל |
-| word-dag | דג |
-| word-har | הר |
-| word-vered | ורד |
-| word-zebra | זברה |
-| word-hatul | חתול |
-| word-tale | טלה |
-| word-yad | יד |
-| word-kelev | כלב |
-| word-lev | לב |
-| word-mayim | מים |
-| word-nahash | נחש |
-| word-sus | סוס |
-| word-ayin | עין |
-| word-pil | פיל |
-| word-tsav | צב |
-| word-kof | קוף |
-| word-rakevet | רכבת |
-| word-shemesh | שמש |
-| word-tapuah | תפוח |
+| word-aryeh | אַרְיֵה |
+| word-bayit | בַּיִת |
+| word-gamal | גָּמָל |
+| word-dag | דָּג |
+| word-har | הַר |
+| word-vered | וֶרֶד |
+| word-zebra | זֶבְרָה |
+| word-hatul | חָתוּל |
+| word-tale | טָלֶה |
+| word-yad | יָד |
+| word-kelev | כֶּלֶב |
+| word-lev | לֵב |
+| word-mayim | מַיִם |
+| word-nahash | נָחָשׁ |
+| word-sus | סוּס |
+| word-ayin | עַיִן |
+| word-pil | פִּיל |
+| word-tsav | צָב |
+| word-kof | קוֹף |
+| word-rakevet | רַכֶּבֶת |
+| word-shemesh | שֶׁמֶשׁ |
+| word-tapuah | תַּפּוּחַ |
 
 ## numbers
 
@@ -165,8 +165,8 @@ and list the ids in public/audio/he/manifest.json. Clips that are missing fall b
 | phrase-tap-numbers | לִחְצוּ עַל מִסְפָּר |
 | phrase-tap-letters | לִחְצוּ עַל אוֹת |
 | phrase-tap-colors | לִחְצוּ עַל צֶבַע |
-| phrase-game-over | המשחק הסתיים, השגת |
-| phrase-0-words | אפס מילים |
-| phrase-1-word | מילה אחת |
-| phrase-2-words | שתי מילים |
-| phrase-words | מילים |
+| phrase-game-over | הַמִּשְׂחָק הִסְתַּיֵּם, הִשַּׂגְתָּ |
+| phrase-0-words | אֶפֶס מִלִּים |
+| phrase-1-word | מִלָּה אַחַת |
+| phrase-2-words | שְׁתֵּי מִלִּים |
+| phrase-words | מִלִּים |

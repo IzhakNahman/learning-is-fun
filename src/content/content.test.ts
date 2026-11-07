@@ -91,8 +91,8 @@ describe('Hebrew specifics', () => {
   });
 
   it('uses the special phrases for one and two words', () => {
-    expect(hebrew.gameOverParts(1).at(-1)?.speech).toBe('מילה אחת');
-    expect(hebrew.gameOverParts(2).at(-1)?.speech).toBe('שתי מילים');
+    expect(hebrew.gameOverParts(1).at(-1)?.speech).toBe('מִלָּה אַחַת');
+    expect(hebrew.gameOverParts(2).at(-1)?.speech).toBe('שְׁתֵּי מִלִּים');
   });
 });
 

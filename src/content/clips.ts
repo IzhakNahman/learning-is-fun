@@ -10,7 +10,7 @@ export function countingPart(pack: LanguagePack, count: number): SpokenPart {
 }
 
 export function gameNamePart(pack: LanguagePack, game: GameId): SpokenPart {
-  return { clipId: `game-name-${game}`, speech: pack.ui.gameNames[game] };
+  return { clipId: `game-name-${game}`, speech: pack.ui.gameNameSpeech[game] };
 }
 
 export function letterNamePart(pack: LanguagePack, letterKey: string): SpokenPart | null {

@@ -269,13 +269,20 @@ const ui: UiText = {
     words: 'אוצר מילים',
     sky: 'משחק המילים',
   },
+  gameNameSpeech: {
+    numbers: 'הֶכֵּרַת הַמִּסְפָּרִים',
+    letters: 'הֶכֵּרַת הָאוֹתִיּוֹת',
+    colors: 'הֶכֵּרַת הַצְּבָעִים',
+    words: 'אוֹצַר מִלִּים',
+    sky: 'מִשְׂחַק הַמִּלִּים',
+  },
   numbers: { placeholder: 'לחצו על מספר', placeholderSpeech: 'לִחְצוּ עַל מִסְפָּר' },
   colors: { placeholder: 'לחצו על צבע', placeholderSpeech: 'לִחְצוּ עַל צֶבַע' },
   letters: {
     placeholder: 'לחצו על אות',
     placeholderSpeech: 'לִחְצוּ עַל אוֹת',
     finalSuffix: 'סופית',
-    finalSuffixSpeech: 'סופית',
+    finalSuffixSpeech: 'סוֹפִית',
   },
   words: {
     stepLetterName: 'שם האות',
@@ -354,14 +361,17 @@ function gameOverText(wordCount: number): string {
 }
 
 function gameOverParts(wordCount: number): SpokenPart[] {
-  const intro: SpokenPart = { clipId: 'phrase-game-over', speech: 'המשחק הסתיים, השגת' };
-  if (wordCount === 0) return [intro, { clipId: 'phrase-0-words', speech: 'אפס מילים' }];
-  if (wordCount === 1) return [intro, { clipId: 'phrase-1-word', speech: 'מילה אחת' }];
-  if (wordCount === 2) return [intro, { clipId: 'phrase-2-words', speech: 'שתי מילים' }];
+  const intro: SpokenPart = {
+    clipId: 'phrase-game-over',
+    speech: 'הַמִּשְׂחָק הִסְתַּיֵּם, הִשַּׂגְתָּ',
+  };
+  if (wordCount === 0) return [intro, { clipId: 'phrase-0-words', speech: 'אֶפֶס מִלִּים' }];
+  if (wordCount === 1) return [intro, { clipId: 'phrase-1-word', speech: 'מִלָּה אַחַת' }];
+  if (wordCount === 2) return [intro, { clipId: 'phrase-2-words', speech: 'שְׁתֵּי מִלִּים' }];
   return [
     intro,
     { clipId: numberClipId(wordCount), speech: numbers.spoken[wordCount] ?? String(wordCount) },
-    { clipId: 'phrase-words', speech: 'מילים' },
+    { clipId: 'phrase-words', speech: 'מִלִּים' },
   ];
 }
 
