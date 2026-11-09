@@ -96,7 +96,6 @@ export interface UiText {
     groupLabel: string;
     baseLegend: string;
     additionLegend: string;
-    restart: string;
     next: string;
   };
   words: { stepLetterName: string; stepLetter: string; stepSound: string; stepWord: string };

@@ -1,4 +1,4 @@
-import { shape } from './shapes';
+import { arc, shape } from './shapes';
 import type { Point, Stroke, TraceSet } from './shapes';
 
 /**
@@ -15,7 +15,7 @@ const RESH: Stroke = [
 ];
 /** Family 2: a short top line, then down. */
 const VAV: Stroke = [
-  [30, 25],
+  [38, 25],
   [60, 25],
   [60, 75],
 ];
@@ -54,7 +54,7 @@ export const hebrewTrace: TraceSet = {
     ב: shape(1, RESH, line([15, 75], [87, 75])),
     כ: shape(1, RESH, line([15, 75], [75, 75])),
     ל: shape(1, RESH, line([15, -4], [15, 25])),
-    ס: shape(1, RESH, line([15, 25], [11, 45], [20, 66], [40, 75], [75, 75])),
+    ס: shape(1, RESH, arc(75, 25, 60, 50, 180, 90)),
     ק: shape(1, RESH, line([38, 45], [38, 100])),
     פ: shape(1, RESH, line([15, 75], [75, 75]), CURL),
     ך: shape(1, RESH, line([75, 75], [75, 100])),
@@ -62,7 +62,7 @@ export const hebrewTrace: TraceSet = {
     ף: shape(1, RESH, line([75, 75], [75, 100]), CURL),
     // Family 2
     ו: shape(1, VAV),
-    י: shape(1, line([30, 25], [60, 25], [60, 45])),
+    י: shape(1, line([38, 25], [60, 25], [60, 45])),
     ז: shape(1, VAV, line([60, 25], [78, 25])),
     ן: shape(1, VAV, line([60, 75], [60, 100])),
     ג: shape(1, VAV, line([35, 50], [60, 50]), line([35, 50], [35, 75])),

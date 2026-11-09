@@ -47,7 +47,7 @@ export function arc(
   fromDegrees: number,
   toDegrees: number,
 ): Point[] {
-  const steps = Math.max(6, Math.round(Math.abs(toDegrees - fromDegrees) / 12));
+  const steps = Math.max(6, Math.round(Math.abs(toDegrees - fromDegrees) / 6));
   const points: Point[] = [];
   for (let step = 0; step <= steps; step++) {
     const radians = ((fromDegrees + ((toDegrees - fromDegrees) * step) / steps) * Math.PI) / 180;

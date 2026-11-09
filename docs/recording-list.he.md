@@ -1,4 +1,4 @@
-# Recording list – עברית
+# Recording list – עִבְרִית
 
 135 short clips. Save each as <clip id>.mp3 (m4a/wav also fine) into public/audio/he/
 and list the ids in public/audio/he/manifest.json. Clips that are missing fall back to the device voice.
@@ -7,10 +7,10 @@ and list the ids in public/audio/he/manifest.json. Clips that are missing fall b
 
 | clip id | say |
 |---|---|
-| game-name-numbers | הֶכֵּרַת הַמִּסְפָּרִים |
-| game-name-letters | הֶכֵּרַת הָאוֹתִיּוֹת |
+| game-name-numbers | הַכָּרַת הַמִּסְפָּרִים |
+| game-name-letters | הַכָּרַת הָאוֹתִיּוֹת |
 | game-name-trace | כְּתִיבַת אוֹתִיּוֹת |
-| game-name-colors | הֶכֵּרַת הַצְּבָעִים |
+| game-name-colors | הַכָּרַת הַצְּבָעִים |
 | game-name-words | אוֹצַר מִלִּים |
 | game-name-sky | מִשְׂחַק הַמִּלִּים |
 

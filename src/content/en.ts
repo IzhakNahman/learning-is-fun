@@ -258,7 +258,6 @@ const ui: UiText = {
     groupLabel: 'Group',
     baseLegend: 'First stroke',
     additionLegend: 'Next strokes',
-    restart: 'Again',
     next: 'Next letter',
   },
   words: {

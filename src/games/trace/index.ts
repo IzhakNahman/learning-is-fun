@@ -125,7 +125,6 @@ function renderControls(pack: LanguagePack): void {
   const controls = byId('tcontrols');
   clearChildren(controls);
   controls.append(
-    createElement('button', { className: 'btn', text: pack.ui.trace.restart, onClick: restart }),
     createElement('button', { className: 'btn', text: pack.ui.trace.next, onClick: goToNext }),
   );
 }
@@ -311,10 +310,6 @@ async function sayLetter(letterKey: string): Promise<void> {
   if (!isCurrentPlayback(playbackId)) return;
   await wait(PAUSE_BETWEEN_NAME_AND_SOUND_MS);
   await speakPartsInOrder([soundPart], playbackId, SPEECH_RATE.LETTER_SOUND);
-}
-
-function restart(): void {
-  if (active) startItem(active.itemKey);
 }
 
 /** Moves to the next item of the group, then to the basic shape of the next group. */

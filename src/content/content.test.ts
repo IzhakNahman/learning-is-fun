@@ -52,6 +52,27 @@ describe.each(LANGUAGE_ORDER)('language pack "%s"', (code) => {
     for (const finalLetter of pack.finalLetters) expect(letterKeys).toContain(finalLetter.baseKey);
   });
 
+  it('shows Hebrew text with niqqud', () => {
+    if (code !== 'he') return;
+    const hasNiqqud = (text: string): boolean => /[\u05B0-\u05C7]/u.test(text);
+    const texts: string[] = [
+      pack.ui.appName,
+      pack.ui.chooseGame,
+      pack.ui.aboutButton,
+      pack.ui.letters.finalSuffix,
+      pack.ui.trace.placeholder,
+      pack.ui.trace.baseLegend,
+      pack.ui.trace.next,
+      pack.ui.about.title,
+      pack.ui.about.intro,
+      ...pack.ui.about.sections.map((section) => section.body),
+      ...Object.values(pack.ui.gameNames),
+      ...pack.colors.flatMap((color) => [color.name, color.example.phrase]),
+      ...pack.letters.map((letter) => letter.name),
+    ];
+    for (const text of texts) expect(hasNiqqud(text), text).toBe(true);
+  });
+
   it('splits the first letter from the rest of a word', () => {
     for (const word of pack.words) {
       const [first, rest] = pack.splitFirstLetter(word.shown);
