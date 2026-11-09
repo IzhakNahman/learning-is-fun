@@ -11,6 +11,7 @@ import { initColorsGame } from './games/colors';
 import { initLettersGame } from './games/letters';
 import { initNumbersGame } from './games/numbers';
 import { initSkyGame, skyScreenHooks, updateSkyFrame } from './games/sky';
+import { initTraceGame } from './games/trace';
 import { initWordsGame } from './games/words';
 import { initAbout } from './ui/about';
 import { initHome } from './ui/home';
@@ -32,6 +33,7 @@ function start(): void {
   initAbout();
   initNumbersGame();
   initLettersGame();
+  initTraceGame();
   initColorsGame();
   initWordsGame();
   initSkyGame();

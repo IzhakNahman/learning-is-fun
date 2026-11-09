@@ -18,6 +18,7 @@ export const STOPS: readonly StopDefinition[] = [
   { game: 'numbers', icon: '🔢', top: '#ff9a6b', bottom: '#ff5e62', edge: '#c63e45' },
   { game: 'colors', icon: '🎨', top: '#ffd45e', bottom: '#ff9f1c', edge: '#c47400' },
   { game: 'letters', icon: '🔤', top: '#a98bff', bottom: '#6c4df0', edge: '#4a31b8' },
+  { game: 'trace', icon: '✏️', top: '#ff9ec7', bottom: '#e8457f', edge: '#a82c58' },
   { game: 'words', icon: '🖼️', top: '#4fe3b0', bottom: '#12a97f', edge: '#0b7a5b' },
   { game: 'sky', icon: '🎁', top: '#5db4ff', bottom: '#2a6df0', edge: '#1b49b5' },
 ];

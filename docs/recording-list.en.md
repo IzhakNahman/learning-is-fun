@@ -1,6 +1,6 @@
 # Recording list – English
 
-141 short clips. Save each as <clip id>.mp3 (m4a/wav also fine) into public/audio/en/
+143 short clips. Save each as <clip id>.mp3 (m4a/wav also fine) into public/audio/en/
 and list the ids in public/audio/en/manifest.json. Clips that are missing fall back to the device voice.
 
 ## game names
@@ -9,6 +9,7 @@ and list the ids in public/audio/en/manifest.json. Clips that are missing fall b
 |---|---|
 | game-name-numbers | Meet the Numbers |
 | game-name-letters | Meet the Letters |
+| game-name-trace | Write the Letters |
 | game-name-colors | Meet the Colours |
 | game-name-words | Word Treasure |
 | game-name-sky | Word Game |
@@ -173,6 +174,7 @@ and list the ids in public/audio/en/manifest.json. Clips that are missing fall b
 | phrase-well-done | Very good! |
 | phrase-tap-numbers | Tap a number |
 | phrase-tap-letters | Tap a letter |
+| phrase-tap-trace | Pick a letter to write |
 | phrase-tap-colors | Tap a colour |
 | phrase-game-over | Game over! You got |
 | phrase-0-words | zero words |

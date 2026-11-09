@@ -1,5 +1,5 @@
 // Offline support: the app shell is cached on first visit; recorded audio is cached as it is used.
-const CACHE_NAME = 'learning-is-fun-v2';
+const CACHE_NAME = 'learning-is-fun-v3';
 const APP_SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', (event) => {

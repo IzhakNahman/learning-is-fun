@@ -231,6 +231,7 @@ const ui: UiText = {
   gameNames: {
     numbers: 'Meet the Numbers',
     letters: 'Meet the Letters',
+    trace: 'Write the Letters',
     colors: 'Meet the Colours',
     words: 'Word Treasure',
     sky: 'Word Game',
@@ -238,6 +239,7 @@ const ui: UiText = {
   gameNameSpeech: {
     numbers: 'Meet the Numbers',
     letters: 'Meet the Letters',
+    trace: 'Write the Letters',
     colors: 'Meet the Colours',
     words: 'Word Treasure',
     sky: 'Word Game',
@@ -249,6 +251,15 @@ const ui: UiText = {
     placeholderSpeech: 'Tap a letter',
     finalSuffix: '',
     finalSuffixSpeech: '',
+  },
+  trace: {
+    placeholder: 'Pick a letter to write',
+    placeholderSpeech: 'Pick a letter to write',
+    familyTitles: ['Straight lines', 'Curves', 'Diagonals'],
+    baseLegend: 'First stroke',
+    additionLegend: 'Next strokes',
+    restart: 'Again',
+    next: 'Next letter',
   },
   words: {
     stepLetterName: 'Letter name',
@@ -285,6 +296,11 @@ const ui: UiText = {
         icon: '🔤',
         game: 'letters',
         body: 'The name and the sound of every letter. In English the sound is the phonics sound used for reading. Children see and hear each letter again and again at their own pace.',
+      },
+      {
+        icon: '✏️',
+        game: 'trace',
+        body: 'The child writes the letter themselves by dragging a dot along the line, from the top down or from left to right. Capital letters are grouped by stroke type, in the same order handwriting programmes use: straight lines first, then curves, then diagonals. The first stroke is coloured by group and the next strokes in another colour. After each letter the child hears its name and sound.',
       },
       {
         icon: '🎨',

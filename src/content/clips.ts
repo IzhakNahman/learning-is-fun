@@ -37,7 +37,7 @@ export function colorPhrasePart(color: ColorEntry): SpokenPart {
   return { clipId: `color-phrase-${color.id}`, speech: color.example.speech };
 }
 
-export type InstructionGame = 'numbers' | 'letters' | 'colors';
+export type InstructionGame = 'numbers' | 'letters' | 'trace' | 'colors';
 
 /** The "tap a ..." instruction shown before the child picks something. */
 export function instructionPart(pack: LanguagePack, game: InstructionGame): SpokenPart {
@@ -68,7 +68,7 @@ export interface RecordingItem {
 /** Every clip the app can play for a language. The recording lists are generated from this. */
 export function listRecordingItems(pack: LanguagePack): RecordingItem[] {
   const items: RecordingItem[] = [];
-  for (const game of ['numbers', 'letters', 'colors', 'words', 'sky'] as const) {
+  for (const game of ['numbers', 'letters', 'trace', 'colors', 'words', 'sky'] as const) {
     items.push({ ...gameNamePart(pack, game), group: 'game names' });
   }
   for (const entry of pack.letters) {
@@ -100,7 +100,9 @@ export function listRecordingItems(pack: LanguagePack): RecordingItem[] {
   }
   const phraseParts = [
     wellDonePart(pack),
-    ...(['numbers', 'letters', 'colors'] as const).map((game) => instructionPart(pack, game)),
+    ...(['numbers', 'letters', 'trace', 'colors'] as const).map((game) =>
+      instructionPart(pack, game),
+    ),
     ...[0, 1, 2, 3].flatMap((count) => pack.gameOverParts(count)),
   ];
   const seen = new Set<string>();

@@ -12,13 +12,9 @@ describe('openPolicy', () => {
 describe('sequentialPolicy', () => {
   it('opens only the first stop when nothing is completed', () => {
     const policy = sequentialPolicy(new Set<GameId>());
-    expect(STOPS.map((_, index) => policy(index, STOPS))).toEqual([
-      true,
-      false,
-      false,
-      false,
-      false,
-    ]);
+    expect(STOPS.map((_, index) => policy(index, STOPS))).toEqual(
+      STOPS.map((_, index) => index === 0),
+    );
   });
 
   it('opens the next stop after the previous game is completed', () => {

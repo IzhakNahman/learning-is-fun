@@ -4,7 +4,7 @@ vi.mock('./speech', () => ({ cancelSpeech: vi.fn() }));
 
 const { getCurrentScreen, navigateTo, registerScreen } = await import('./router');
 
-const SCREENS = ['home', 'numbers', 'letters', 'colors', 'words', 'sky'];
+const SCREENS = ['home', 'numbers', 'letters', 'trace', 'colors', 'words', 'sky'];
 
 describe('router', () => {
   beforeEach(() => {

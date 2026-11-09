@@ -1,5 +1,5 @@
 export type LanguageCode = 'he' | 'en';
-export type GameId = 'numbers' | 'letters' | 'colors' | 'words' | 'sky';
+export type GameId = 'numbers' | 'letters' | 'trace' | 'colors' | 'words' | 'sky';
 export type TextDirection = 'rtl' | 'ltr';
 
 /**
@@ -88,6 +88,16 @@ export interface UiText {
     placeholderSpeech: string;
     finalSuffix: string;
     finalSuffixSpeech: string;
+  };
+  trace: {
+    placeholder: string;
+    placeholderSpeech: string;
+    /** Names of the letter families, in the same order as the family list. */
+    familyTitles: readonly string[];
+    baseLegend: string;
+    additionLegend: string;
+    restart: string;
+    next: string;
   };
   words: { stepLetterName: string; stepLetter: string; stepSound: string; stepWord: string };
   sky: {

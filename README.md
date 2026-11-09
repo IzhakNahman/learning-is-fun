@@ -1,6 +1,6 @@
 # Learning is Fun / לומדים בכיף
 
-Four short games that teach Hebrew and English letters, sounds, numbers and words to young children.
+Six short games that teach Hebrew and English letters, sounds, numbers and words to young children.
 No login, no tracking, nothing saved except the chosen language.
 
 ## Run
@@ -17,7 +17,7 @@ npm run recording-lists   # regenerate docs/recording-list.<lang>.md
 src/
   content/   language packs (he.ts, en.ts), shared types, recording-id helpers
   core/      language, router, speech + recorded audio, sound effects, loop, DOM helpers
-  games/     numbers, letters, words, sky/ (config, boxes, controls, render, hud, overlays, state flow)
+  games/     numbers, letters, words, trace/ (write the letters), sky/ (config, boxes, controls, render, hud, overlays, state flow)
   ui/        home screen, about page
 public/      manifest, service worker, icons, audio/<lang>/ (recordings go here)
 docs/        generated recording lists

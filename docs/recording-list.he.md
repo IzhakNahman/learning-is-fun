@@ -1,6 +1,6 @@
 # Recording list – עברית
 
-133 short clips. Save each as <clip id>.mp3 (m4a/wav also fine) into public/audio/he/
+135 short clips. Save each as <clip id>.mp3 (m4a/wav also fine) into public/audio/he/
 and list the ids in public/audio/he/manifest.json. Clips that are missing fall back to the device voice.
 
 ## game names
@@ -9,6 +9,7 @@ and list the ids in public/audio/he/manifest.json. Clips that are missing fall b
 |---|---|
 | game-name-numbers | הֶכֵּרַת הַמִּסְפָּרִים |
 | game-name-letters | הֶכֵּרַת הָאוֹתִיּוֹת |
+| game-name-trace | כְּתִיבַת אוֹתִיּוֹת |
 | game-name-colors | הֶכֵּרַת הַצְּבָעִים |
 | game-name-words | אוֹצַר מִלִּים |
 | game-name-sky | מִשְׂחַק הַמִּלִּים |
@@ -164,6 +165,7 @@ and list the ids in public/audio/he/manifest.json. Clips that are missing fall b
 | phrase-well-done | כָּל הַכָּבוֹד! |
 | phrase-tap-numbers | לִחְצוּ עַל מִסְפָּר |
 | phrase-tap-letters | לִחְצוּ עַל אוֹת |
+| phrase-tap-trace | בִּחְרוּ אוֹת לִכְתִיבָה |
 | phrase-tap-colors | לִחְצוּ עַל צֶבַע |
 | phrase-game-over | הַמִּשְׂחָק הִסְתַּיֵּם, הִשַּׂגְתָּ |
 | phrase-0-words | אֶפֶס מִלִּים |

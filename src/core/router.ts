@@ -1,14 +1,22 @@
 import { byId } from './dom';
 import { beginPlayback } from './playback';
 
-export type ScreenId = 'home' | 'numbers' | 'letters' | 'colors' | 'words' | 'sky';
+export type ScreenId = 'home' | 'numbers' | 'letters' | 'trace' | 'colors' | 'words' | 'sky';
 
 export interface ScreenHooks {
   enter?: () => void;
   leave?: () => void;
 }
 
-const SCREEN_IDS: readonly ScreenId[] = ['home', 'numbers', 'letters', 'colors', 'words', 'sky'];
+const SCREEN_IDS: readonly ScreenId[] = [
+  'home',
+  'numbers',
+  'letters',
+  'trace',
+  'colors',
+  'words',
+  'sky',
+];
 const hooks = new Map<ScreenId, ScreenHooks>();
 let currentScreen: ScreenId = 'home';
 
