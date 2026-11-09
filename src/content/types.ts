@@ -92,8 +92,8 @@ export interface UiText {
   trace: {
     placeholder: string;
     placeholderSpeech: string;
-    /** Names of the letter families, in the same order as the family list. */
-    familyTitles: readonly string[];
+    /** Word before the group number on a group button, e.g. "Group" (the number is added). */
+    groupLabel: string;
     baseLegend: string;
     additionLegend: string;
     restart: string;

@@ -17,6 +17,8 @@ export interface TraceFamily {
   id: string;
   /** Colour of the basic strokes. The additions use `ADDITION_COLOR`. */
   color: string;
+  /** The group's basic shape: practised on its own, and the start of every letter in the group. */
+  basicShape: LetterShape;
   /** Keys into `TraceSet.shapes`, in teaching order. */
   letters: readonly string[];
 }

@@ -1395,3 +1395,43 @@ button,
     flex: none;
   }
 }
+
+.trace-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2vmin;
+  min-height: 1.2em;
+}
+
+.trace-letter {
+  font-size: clamp(28px, 9vmin, 64px);
+  font-weight: 900;
+  line-height: 1;
+  color: #1b4fa0;
+  display: inline-flex;
+  align-items: center;
+}
+
+.shape-icon {
+  width: 1.5em;
+  height: 1.5em;
+  flex: none;
+}
+
+.trace-letter .shape-icon {
+  width: 1em;
+  height: 1em;
+}
+
+.trace-families .trace-family {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1vmin;
+}
+
+.tile.basic .shape-icon {
+  width: 60%;
+  height: 60%;
+}

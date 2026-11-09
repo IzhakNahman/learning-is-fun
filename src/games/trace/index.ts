@@ -8,19 +8,21 @@ import { readSetting, writeSetting } from '../../core/storage';
 import { SPEECH_RATE, speakPartsInOrder } from '../../core/voice';
 import { showInstruction } from '../../ui/instruction';
 import { advanceAlong, isAtEnd, isNearDot, sampleStroke } from './engine';
+import { polyline, shapeIcon, svgElement } from './icon';
 import { resolveLetter } from './letters';
 import { ADDITION_COLOR, DRAWING_BOX } from './shapes';
 import type { LetterShape, Point, TraceFamily, TraceSet } from './shapes';
 import { englishTrace } from './shapes.en';
 import { hebrewTrace } from './shapes.he';
 
-const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 const PAUSE_BETWEEN_NAME_AND_SOUND_MS = 200;
-const LINE_WIDTH = 9;
 const TRACE_SETS: Record<LanguageCode, TraceSet> = { he: hebrewTrace, en: englishTrace };
+/** The first tile of every group: the group's basic shape, practised on its own. */
+const BASIC_KEY = 'basic';
 
-interface ActiveLetter {
-  shapeKey: string;
+interface ActiveItem {
+  /** A letter key, or `BASIC_KEY` for the group's basic shape. */
+  itemKey: string;
   shape: LetterShape;
   family: TraceFamily;
   samples: Point[][];
@@ -31,7 +33,7 @@ interface ActiveLetter {
 }
 
 let familyIndex = 0;
-let active: ActiveLetter | null = null;
+let active: ActiveItem | null = null;
 let completed = new Set<string>();
 
 export function initTraceGame(): void {
@@ -59,15 +61,30 @@ function currentSet(pack: LanguagePack): TraceSet {
   return TRACE_SETS[pack.code];
 }
 
+/** Progress key: a letter's own key, or "basic:<group id>" for a group's basic shape. */
+function progressKey(family: TraceFamily, itemKey: string): string {
+  return itemKey === BASIC_KEY ? `${BASIC_KEY}:${family.id}` : itemKey;
+}
+
+/** The items of a group in order: the basic shape first, then its letters. */
+function itemsOf(family: TraceFamily): string[] {
+  return [BASIC_KEY, ...family.letters];
+}
+
 function renderTraceGame(pack: LanguagePack): void {
   familyIndex = 0;
-  active = null;
   completed = loadCompleted(pack);
-  renderFamilies(pack);
-  renderLetterTiles(pack);
   renderControls(pack);
+  showNothingSelected(pack);
+}
+
+function showNothingSelected(pack: LanguagePack): void {
+  active = null;
+  renderFamilies(pack);
+  renderItemTiles(pack);
   clearChildren(byId('tdrawing'));
-  byId('tlegend').textContent = '';
+  clearChildren(byId('tletter'));
+  clearChildren(byId('tlegend'));
   showInstruction(byId('tname'), pack, 'trace');
 }
 
@@ -75,27 +92,31 @@ function renderFamilies(pack: LanguagePack): void {
   const container = byId('tfamilies');
   clearChildren(container);
   currentSet(pack).families.forEach((family, index) => {
+    const label = `${pack.ui.trace.groupLabel} ${index + 1}`;
     const button = createElement('button', {
       className: index === familyIndex ? 'tile trace-family sel' : 'tile trace-family',
-      text: pack.ui.trace.familyTitles[index] ?? family.id,
     });
     button.style.borderBottomColor = family.color;
+    button.append(shapeIcon(family.basicShape, family.color), label);
     button.addEventListener('click', () => selectFamily(index));
     container.append(button);
   });
 }
 
-function renderLetterTiles(pack: LanguagePack): void {
+function renderItemTiles(pack: LanguagePack): void {
   const grid = byId('tgrid');
   clearChildren(grid);
   const family = currentSet(pack).families[familyIndex];
   if (!family) return;
-  for (const shapeKey of family.letters) {
+  for (const itemKey of itemsOf(family)) {
     const classes = ['tile'];
-    if (completed.has(shapeKey)) classes.push('done');
-    if (active?.shapeKey === shapeKey) classes.push('sel');
-    const tile = createElement('button', { className: classes.join(' '), text: shapeKey });
-    tile.addEventListener('click', () => startLetter(shapeKey));
+    if (itemKey === BASIC_KEY) classes.push('basic');
+    if (completed.has(progressKey(family, itemKey))) classes.push('done');
+    if (active?.itemKey === itemKey) classes.push('sel');
+    const tile = createElement('button', { className: classes.join(' ') });
+    if (itemKey === BASIC_KEY) tile.append(shapeIcon(family.basicShape, family.color));
+    else tile.textContent = itemKey;
+    tile.addEventListener('click', () => startItem(itemKey));
     grid.append(tile);
   }
 }
@@ -110,25 +131,19 @@ function renderControls(pack: LanguagePack): void {
 }
 
 function selectFamily(index: number): void {
-  const pack = getPack();
   familyIndex = index;
-  active = null;
-  renderFamilies(pack);
-  renderLetterTiles(pack);
-  clearChildren(byId('tdrawing'));
-  byId('tlegend').textContent = '';
-  showInstruction(byId('tname'), pack, 'trace');
+  showNothingSelected(getPack());
 }
 
-function startLetter(shapeKey: string): void {
+function startItem(itemKey: string): void {
   const pack = getPack();
   const set = currentSet(pack);
-  const shape = set.shapes[shapeKey];
   const family = set.families[familyIndex];
+  const shape = itemKey === BASIC_KEY ? family?.basicShape : set.shapes[itemKey];
   if (!shape || !family) return;
   beginPlayback();
   active = {
-    shapeKey,
+    itemKey,
     shape,
     family,
     samples: shape.strokes.map((stroke) => sampleStroke(stroke)),
@@ -137,17 +152,29 @@ function startLetter(shapeKey: string): void {
     dragging: false,
     finished: false,
   };
-  renderLetterTiles(pack);
-  showLetterName(pack, shapeKey);
+  renderItemTiles(pack);
+  showTitle(pack, family, itemKey);
   renderLegend(pack, family);
   draw();
 }
 
-function showLetterName(pack: LanguagePack, shapeKey: string): void {
-  const resolved = resolveLetter(pack, shapeKey);
+/** Shows the letter itself and its name above the drawing (for the basic shape: the group). */
+function showTitle(pack: LanguagePack, family: TraceFamily, itemKey: string): void {
+  const letterBox = byId('tletter');
+  clearChildren(letterBox);
+  const name = byId('tname');
+  if (itemKey === BASIC_KEY) {
+    const index = currentSet(pack).families.indexOf(family);
+    letterBox.append(shapeIcon(family.basicShape, family.color));
+    name.textContent = `${pack.ui.trace.groupLabel} ${index + 1}`;
+    return;
+  }
+  const resolved = resolveLetter(pack, itemKey);
   const entry = pack.letters.find((item) => item.key === resolved?.letterKey);
   const suffix = resolved?.isFinal ? pack.ui.letters.finalSuffix : '';
-  byId('tname').textContent = entry ? `${entry.name} ${suffix}`.trim() : shapeKey;
+  const useDotted = pack.code === 'he' && !resolved?.isFinal;
+  letterBox.textContent = useDotted && entry ? entry.tileText : itemKey;
+  name.textContent = entry ? `${entry.name} ${suffix}`.trim() : itemKey;
 }
 
 function renderLegend(pack: LanguagePack, family: TraceFamily): void {
@@ -164,48 +191,28 @@ function renderLegend(pack: LanguagePack, family: TraceFamily): void {
   );
 }
 
-function colorOfStroke(letter: ActiveLetter, strokeIndex: number): string {
-  return strokeIndex < letter.shape.baseStrokes ? letter.family.color : ADDITION_COLOR;
-}
-
-function svgElement<K extends keyof SVGElementTagNameMap>(
-  tag: K,
-  attributes: Record<string, string>,
-): SVGElementTagNameMap[K] {
-  const element = document.createElementNS(SVG_NAMESPACE, tag);
-  for (const [name, value] of Object.entries(attributes)) element.setAttribute(name, value);
-  return element;
-}
-
-function polyline(points: readonly Point[], color: string, opacity: number): SVGElement {
-  return svgElement('polyline', {
-    points: points.map(([x, y]) => `${x},${y}`).join(' '),
-    fill: 'none',
-    stroke: color,
-    'stroke-opacity': String(opacity),
-    'stroke-width': String(LINE_WIDTH),
-    'stroke-linecap': 'round',
-    'stroke-linejoin': 'round',
-  });
+function colorOfStroke(item: ActiveItem, strokeIndex: number): string {
+  return strokeIndex < item.shape.baseStrokes ? item.family.color : ADDITION_COLOR;
 }
 
 function draw(): void {
   const drawing = byId('tdrawing');
   clearChildren(drawing);
   if (!active) return;
+  const item = active;
 
-  active.samples.forEach((samples, index) => {
-    const done = index < active!.strokeIndex || active!.finished;
-    drawing.append(polyline(samples, colorOfStroke(active!, index), done ? 1 : 0.22));
+  item.samples.forEach((samples, index) => {
+    const done = index < item.strokeIndex || item.finished;
+    drawing.append(polyline(samples, colorOfStroke(item, index), done ? 1 : 0.22));
   });
-  if (active.finished) return;
+  if (item.finished) return;
 
-  const samples = active.samples[active.strokeIndex];
-  const dot = samples?.[active.sampleIndex];
+  const samples = item.samples[item.strokeIndex];
+  const dot = samples?.[item.sampleIndex];
   if (!samples || !dot) return;
-  const color = colorOfStroke(active, active.strokeIndex);
-  drawing.append(polyline(samples.slice(0, active.sampleIndex + 1), color, 1));
-  if (active.sampleIndex === 0) {
+  const color = colorOfStroke(item, item.strokeIndex);
+  drawing.append(polyline(samples.slice(0, item.sampleIndex + 1), color, 1));
+  if (item.sampleIndex === 0) {
     drawing.append(
       svgElement('circle', {
         cx: String(dot[0]),
@@ -234,7 +241,7 @@ function draw(): void {
     fill: '#412402',
     'font-weight': '700',
   });
-  number.textContent = String(active.strokeIndex + 1);
+  number.textContent = String(item.strokeIndex + 1);
   drawing.append(number);
 }
 
@@ -272,27 +279,28 @@ function stopDragging(): void {
   if (active) active.dragging = false;
 }
 
-function finishStroke(letter: ActiveLetter): void {
-  letter.dragging = false;
-  playTapBlip(letter.strokeIndex);
-  letter.strokeIndex += 1;
-  letter.sampleIndex = 0;
-  if (letter.strokeIndex >= letter.samples.length) finishLetter(letter);
+function finishStroke(item: ActiveItem): void {
+  item.dragging = false;
+  playTapBlip(item.strokeIndex);
+  item.strokeIndex += 1;
+  item.sampleIndex = 0;
+  if (item.strokeIndex >= item.samples.length) finishItem(item);
   else draw();
 }
 
-function finishLetter(letter: ActiveLetter): void {
-  letter.finished = true;
-  completed.add(letter.shapeKey);
-  writeSetting(storageKey(getPack()), [...completed].join(','));
-  renderLetterTiles(getPack());
+function finishItem(item: ActiveItem): void {
+  const pack = getPack();
+  item.finished = true;
+  completed.add(progressKey(item.family, item.itemKey));
+  writeSetting(storageKey(pack), [...completed].join(','));
+  renderItemTiles(pack);
   draw();
-  void sayLetter(letter.shapeKey);
+  if (item.itemKey !== BASIC_KEY) void sayLetter(item.itemKey);
 }
 
-async function sayLetter(shapeKey: string): Promise<void> {
+async function sayLetter(letterKey: string): Promise<void> {
   const pack = getPack();
-  const resolved = resolveLetter(pack, shapeKey);
+  const resolved = resolveLetter(pack, letterKey);
   if (!resolved) return;
   const nameParts = letterNamePart(pack, resolved.letterKey);
   const soundPart = letterSoundPart(pack, resolved.letterKey);
@@ -306,22 +314,22 @@ async function sayLetter(shapeKey: string): Promise<void> {
 }
 
 function restart(): void {
-  if (active) startLetter(active.shapeKey);
+  if (active) startItem(active.itemKey);
 }
 
-/** Moves to the next letter of the family, then to the first letter of the next family. */
+/** Moves to the next item of the group, then to the basic shape of the next group. */
 function goToNext(): void {
   const pack = getPack();
   const families = currentSet(pack).families;
   const family = families[familyIndex];
   if (!family) return;
-  const position = active ? family.letters.indexOf(active.shapeKey) : -1;
-  const nextInFamily = family.letters[position + 1];
-  if (nextInFamily) {
-    startLetter(nextInFamily);
+  const items = itemsOf(family);
+  const position = active ? items.indexOf(active.itemKey) : -1;
+  const nextInGroup = items[position + 1];
+  if (nextInGroup) {
+    startItem(nextInGroup);
     return;
   }
   selectFamily((familyIndex + 1) % families.length);
-  const first = currentSet(pack).families[familyIndex]?.letters[0];
-  if (first) startLetter(first);
+  startItem(BASIC_KEY);
 }

@@ -68,8 +68,23 @@ export const englishTrace: TraceSet = {
     Z: shape(1, line([25, 15], [75, 15]), line([75, 15], [25, 85]), line([25, 85], [75, 85])),
   },
   families: [
-    { id: 'lines', color: '#378ADD', letters: [...'LFEHTI'] },
-    { id: 'curves', color: '#1D9E75', letters: [...'UCOQGSJDPBR'] },
-    { id: 'diagonals', color: '#D85A30', letters: [...'KANMVWXYZ'] },
+    {
+      id: 'lines',
+      color: '#378ADD',
+      basicShape: shape(1, line([50, 15], [50, 85])),
+      letters: [...'LFEHTI'],
+    },
+    {
+      id: 'curves',
+      color: '#1D9E75',
+      basicShape: shape(1, arc(40, 50, 30, 35, -90, 90)),
+      letters: [...'UCOQGSJDPBR'],
+    },
+    {
+      id: 'diagonals',
+      color: '#D85A30',
+      basicShape: shape(1, line([25, 15], [75, 85])),
+      letters: [...'KANMVWXYZ'],
+    },
   ],
 };

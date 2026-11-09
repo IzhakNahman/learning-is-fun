@@ -78,10 +78,10 @@ export const hebrewTrace: TraceSet = {
     מ: shape(1, NUN, line([75, 28], [15, 58]), line([33, 20], [33, 49])),
   },
   families: [
-    { id: 'resh', color: '#378ADD', letters: [...'רדהחתבכלסקפךםף'] },
-    { id: 'vav', color: '#1D9E75', letters: [...'ויזןג'] },
-    { id: 'tsadi', color: '#D85A30', letters: [...'צאץ'] },
-    { id: 'nun', color: '#7F77DD', letters: [...'נטשעמ'] },
+    { id: 'resh', color: '#378ADD', basicShape: shape(1, RESH), letters: [...'רדהחתבכלסקפךםף'] },
+    { id: 'vav', color: '#1D9E75', basicShape: shape(1, VAV), letters: [...'ויזןג'] },
+    { id: 'tsadi', color: '#D85A30', basicShape: shape(2, DIAGONAL, BRANCH), letters: [...'צאץ'] },
+    { id: 'nun', color: '#7F77DD', basicShape: shape(1, NUN), letters: [...'נטשעמ'] },
   ],
 };
 

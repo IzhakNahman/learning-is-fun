@@ -255,7 +255,7 @@ const ui: UiText = {
   trace: {
     placeholder: 'Pick a letter to write',
     placeholderSpeech: 'Pick a letter to write',
-    familyTitles: ['Straight lines', 'Curves', 'Diagonals'],
+    groupLabel: 'Group',
     baseLegend: 'First stroke',
     additionLegend: 'Next strokes',
     restart: 'Again',
@@ -300,7 +300,7 @@ const ui: UiText = {
       {
         icon: '✏️',
         game: 'trace',
-        body: 'The child writes the letter themselves by dragging a dot along the line, from the top down or from left to right. Capital letters are grouped by stroke type, in the same order handwriting programmes use: straight lines first, then curves, then diagonals. The first stroke is coloured by group and the next strokes in another colour. After each letter the child hears its name and sound.',
+        body: 'The child writes the letter themselves by dragging a dot along the line, from the top down or from left to right. Capital letters are grouped by stroke type, in the same order handwriting programmes use: straight lines first, then curves, then diagonals. Each group starts with its basic shape to practise, and the first stroke is coloured by group and the next strokes in another colour. After each letter the child hears its name and sound.',
       },
       {
         icon: '🎨',

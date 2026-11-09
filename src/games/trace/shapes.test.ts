@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { packs } from '../../content';
 import { englishTrace } from './shapes.en';
 import { HEBREW_RIGHT_TO_LEFT_BASE, hebrewTrace } from './shapes.he';
-import type { Point, Stroke, TraceSet } from './shapes';
+import type { LetterShape, Point, Stroke, TraceSet } from './shapes';
 
 const SETS: [string, TraceSet][] = [
   ['Hebrew', hebrewTrace],
@@ -36,7 +36,11 @@ describe.each(SETS)('%s tracing shapes', (_name, set) => {
   });
 
   it('keeps every point inside the drawing area', () => {
-    for (const [key, letterShape] of Object.entries(set.shapes)) {
+    const everyShape = [
+      ...Object.entries(set.shapes),
+      ...set.families.map((family): [string, LetterShape] => [family.id, family.basicShape]),
+    ];
+    for (const [key, letterShape] of everyShape) {
       for (const stroke of letterShape.strokes) {
         for (const [x, y] of stroke) {
           expect(x, key).toBeGreaterThanOrEqual(5);
@@ -45,6 +49,12 @@ describe.each(SETS)('%s tracing shapes', (_name, set) => {
           expect(y, key).toBeLessThanOrEqual(100);
         }
       }
+    }
+  });
+
+  it('gives every group a basic shape made only of its basic strokes', () => {
+    for (const family of set.families) {
+      expect(family.basicShape.baseStrokes, family.id).toBe(family.basicShape.strokes.length);
     }
   });
 
@@ -62,24 +72,29 @@ describe('Hebrew shapes', () => {
     expect(Object.keys(hebrewTrace.shapes).sort()).toEqual([...wanted].sort());
   });
 
-  it('starts every letter of a family with the same basic shape', () => {
-    // י is the small version of the family-2 basic shape.
+  it('starts every letter of a group with the group basic shape, identical in every letter', () => {
+    // י is the small version of the group-2 basic shape.
     const exceptions = new Set(['י']);
     for (const family of hebrewTrace.families) {
-      const first = hebrewTrace.shapes[family.letters[0] ?? ''];
-      if (!first) throw new Error(`Empty family ${family.id}`);
-      const base = first.strokes.slice(0, first.baseStrokes);
+      const base = family.basicShape.strokes;
       for (const key of family.letters) {
         if (exceptions.has(key)) continue;
         const letterShape = hebrewTrace.shapes[key];
-        expect(letterShape?.baseStrokes, key).toBe(first.baseStrokes);
-        expect(letterShape?.strokes.slice(0, first.baseStrokes), key).toEqual(base);
+        expect(letterShape?.baseStrokes, key).toBe(family.basicShape.baseStrokes);
+        expect(letterShape?.strokes.slice(0, base.length), key).toEqual(base);
       }
     }
   });
 
   it('only drags downward or from left to right (except the family-4 base)', () => {
-    for (const [key, letterShape] of Object.entries(hebrewTrace.shapes)) {
+    const everyShape = [
+      ...Object.entries(hebrewTrace.shapes),
+      ...hebrewTrace.families.map((family): [string, LetterShape] => [
+        family.id,
+        family.basicShape,
+      ]),
+    ];
+    for (const [key, letterShape] of everyShape) {
       letterShape.strokes.forEach((stroke, strokeIndex) => {
         if (stroke === HEBREW_RIGHT_TO_LEFT_BASE && strokeIndex === 0) return;
         for (const [from, to] of segments(stroke)) {
