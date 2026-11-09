@@ -86,11 +86,6 @@ export function initSkyGame(): void {
   byId('skyhome').addEventListener('click', () => navigateTo('home'));
 }
 
-/** Read-only view of the game state, for tests and debugging. */
-export function getSkySnapshot(): Readonly<SkyState> | null {
-  return state;
-}
-
 /** Called every animation frame while the sky screen is visible. */
 export function updateSkyFrame(seconds: number): void {
   if (!state || !renderer) return;

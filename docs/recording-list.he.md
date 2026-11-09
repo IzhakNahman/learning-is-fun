@@ -1,6 +1,6 @@
 # Recording list – עִבְרִית
 
-135 short clips. Save each as <clip id>.mp3 (m4a/wav also fine) into public/audio/he/
+136 short clips. Save each as <clip id>.mp3 (m4a/wav also fine) into public/audio/he/
 and list the ids in public/audio/he/manifest.json. Clips that are missing fall back to the device voice.
 
 ## game names
@@ -163,6 +163,7 @@ and list the ids in public/audio/he/manifest.json. Clips that are missing fall b
 | clip id | say |
 |---|---|
 | phrase-well-done | כָּל הַכָּבוֹד! |
+| phrase-lets-play | בּוֹאוּ נְשַׂחֵק! |
 | phrase-tap-numbers | לִחְצוּ עַל מִסְפָּר |
 | phrase-tap-letters | לִחְצוּ עַל אוֹת |
 | phrase-tap-trace | בִּחְרוּ אוֹת לִכְתִיבָה |

@@ -2,9 +2,12 @@ import { LANGUAGE_ORDER, packs } from '../content';
 import type { LanguagePack } from '../content';
 import { byId, clearChildren, createElement } from '../core/dom';
 import { getPack, onLanguageChange, setLanguage } from '../core/i18n';
-import { navigateTo } from '../core/router';
+import { navigateTo, registerScreen } from '../core/router';
 import { findVoiceFor } from '../core/speech';
 import type { RoadOrientation } from '../journey/layout';
+import { loadPlayedGames, markGamePlayed } from '../journey/played';
+import { STOPS } from '../journey/stops';
+import type { GameId } from '../content';
 import { openPolicy } from '../journey/unlock';
 import { openAbout } from './about';
 import { buildRoad, scrollRoadToStart } from './road';
@@ -18,7 +21,14 @@ export function initHome(): void {
   window
     .matchMedia?.('(orientation: portrait)')
     .addEventListener('change', () => renderHome(getPack()));
+  registerScreen('home', { enter: () => renderHome(getPack()) });
   renderHome(getPack());
+}
+
+/** Opening a game remembers it, so the road can show a star and point at the next one. */
+function openGame(game: GameId): void {
+  markGamePlayed(game, STOPS);
+  navigateTo(game);
 }
 
 function currentOrientation(): RoadOrientation {
@@ -33,17 +43,23 @@ function renderHome(pack: LanguagePack): void {
   clearChildren(home);
 
   const orientation = currentOrientation();
-  const road = buildRoad({ pack, orientation, isUnlocked: unlockPolicy, onOpen: navigateTo });
+  const road = buildRoad({
+    pack,
+    orientation,
+    isUnlocked: unlockPolicy,
+    playedGames: loadPlayedGames(STOPS),
+    onOpen: openGame,
+  });
   const voiceNote = createElement('div', { id: 'vnote' });
 
   home.append(
     createElement('button', { id: 'abtn', text: `ℹ️ ${pack.ui.aboutButton}`, onClick: openAbout }),
+    buildSky(),
     buildLanguageSwitch(pack),
     createElement(
       'div',
       { className: 'home-head' },
       createElement('h1', { text: `☁️ ${pack.ui.appName} ☁️` }),
-      createElement('h2', { text: pack.ui.chooseGame }),
     ),
     road,
     createElement(
@@ -57,6 +73,17 @@ function renderHome(pack: LanguagePack): void {
   scrollRoadToStart(road, orientation);
   updateVoiceNote(voiceNote, pack);
   setTimeout(() => updateVoiceNote(voiceNote, pack), VOICE_CHECK_DELAY_MS);
+}
+
+/** Sun and slowly drifting clouds behind the title. */
+function buildSky(): HTMLElement {
+  const sky = createElement('div', { className: 'home-sky' });
+  sky.setAttribute('aria-hidden', 'true');
+  sky.append(
+    createElement('span', { className: 'sun' }),
+    ...[0, 1, 2].map(() => createElement('span', { className: 'cloud' })),
+  );
+  return sky;
 }
 
 function buildLanguageSwitch(current: LanguagePack): HTMLElement {

@@ -271,8 +271,8 @@ const numbers: NumberNames = {
 
 const ui: UiText = {
   appName: 'לוֹמְדִים בְּכֵיף',
-  chooseGame: 'בִּחְרוּ מִשְׂחָק',
   aboutButton: 'אוֹדוֹת',
+  guide: { label: 'בּוֹאוּ נְשַׂחֵק!', speech: 'בּוֹאוּ נְשַׂחֵק!' },
   credit: 'נוֹצַר עַל־יְדֵי יִצְחָק נַחְמָן · כָּל הַזְּכֻיּוֹת שְׁמוּרוֹת ©',
   gameNames: {
     numbers: 'הַכָּרַת הַמִּסְפָּרִים',

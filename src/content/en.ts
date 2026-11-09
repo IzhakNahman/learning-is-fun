@@ -225,8 +225,8 @@ const numbers: NumberNames = {
 
 const ui: UiText = {
   appName: 'Learning is Fun',
-  chooseGame: 'Pick a game',
   aboutButton: 'About',
+  guide: { label: "Let's play!", speech: "Let's play!" },
   credit: 'Created by Izhak Nachman · All rights reserved ©',
   gameNames: {
     numbers: 'Meet the Numbers',

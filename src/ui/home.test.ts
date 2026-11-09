@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { STOPS } from '../journey/stops';
 
 const navigateTo = vi.hoisted(() => vi.fn());
-vi.mock('../core/router', () => ({ navigateTo }));
+vi.mock('../core/router', () => ({ navigateTo, registerScreen: vi.fn() }));
 vi.mock('../core/voice', () => ({ speakInterrupting: vi.fn(() => Promise.resolve()) }));
 
 import { setLanguage } from '../core/i18n';

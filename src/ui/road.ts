@@ -1,6 +1,7 @@
 import { gameNamePart } from '../content';
 import type { GameId, LanguagePack } from '../content';
 import { createElement } from '../core/dom';
+import { svgElement } from '../core/svg';
 import { speakInterrupting } from '../core/voice';
 import {
   PATH_VIEW_SIZE,
@@ -8,40 +9,61 @@ import {
   buildRoadPath,
   layoutStops,
   placeDecor,
+  roadMarkers,
   type DecorKind,
   type Point,
   type RoadOrientation,
 } from '../journey/layout';
+import { nextGameToPlay } from '../journey/played';
 import { STOPS, type StopDefinition } from '../journey/stops';
 import type { UnlockPolicy } from '../journey/unlock';
+import { buildGuide } from './guide';
 
-const SVG_NS = 'http://www.w3.org/2000/svg';
-
-const DECOR_EMOJI: Record<DecorKind, string> = {
+const DECOR_EMOJI: Record<Exclude<DecorKind, 'letter'>, string> = {
   tree: '🌳',
   pine: '🌲',
   bush: '🌿',
-  rock: '🪨',
   flower: '🌸',
 };
+/** The big faded numbers that share the "letter land" scenery with the letters. */
+const DECOR_DIGITS = ['1', '2', '3', '4', '5'];
+const START_MARKER = '🚩';
+const FINISH_MARKER = '🏁';
+const PLAYED_STAR = '⭐';
 
 export interface RoadOptions {
   pack: LanguagePack;
   orientation: RoadOrientation;
   isUnlocked: UnlockPolicy;
+  /** Games the child has already opened; they get a star. */
+  playedGames: ReadonlySet<GameId>;
   onOpen: (game: GameId) => void;
 }
 
 /** The scrollable scene: sky, river, winding road, scenery and one button per stop. */
-export function buildRoad({ pack, orientation, isUnlocked, onOpen }: RoadOptions): HTMLElement {
+export function buildRoad(options: RoadOptions): HTMLElement {
+  const { pack, orientation, isUnlocked, playedGames, onOpen } = options;
   const points = layoutStops(STOPS.length, orientation, pack.dir === 'rtl');
   const scene = createElement('div', { className: `road-scene ${orientation}` });
   scene.append(buildPathsSvg(points, orientation));
-  for (const item of placeDecor(points, orientation)) scene.append(buildDecor(item, item.kind));
+  placeDecor(points, orientation).forEach((item, index) => {
+    scene.append(buildDecor(item, decorText(item.kind, index, pack)));
+  });
+  const markers = roadMarkers(points, orientation);
+  scene.append(
+    buildMarker(markers.start, START_MARKER, 'start'),
+    buildMarker(markers.finish, FINISH_MARKER, 'finish'),
+  );
+  const guideGame = nextGameToPlay(STOPS, playedGames);
   STOPS.forEach((stop, index) => {
     const point = points[index];
     if (!point) return;
-    scene.append(buildStop(stop, point, isUnlocked(index, STOPS), pack, onOpen));
+    const status = {
+      unlocked: isUnlocked(index, STOPS),
+      played: playedGames.has(stop.game),
+      hasGuide: stop.game === guideGame,
+    };
+    scene.append(buildStop(stop, point, status, pack, onOpen));
   });
   return createElement('div', { className: 'road-scroll' }, scene);
 }
@@ -50,15 +72,6 @@ export function buildRoad({ pack, orientation, isUnlocked, onOpen }: RoadOptions
 export function scrollRoadToStart(scroller: HTMLElement, orientation: RoadOrientation): void {
   if (orientation === 'portrait') scroller.scrollTop = scroller.scrollHeight;
   else scroller.scrollLeft = 0;
-}
-
-function svgElement<K extends keyof SVGElementTagNameMap>(
-  tag: K,
-  attributes: Record<string, string>,
-): SVGElementTagNameMap[K] {
-  const element = document.createElementNS(SVG_NS, tag);
-  for (const [name, value] of Object.entries(attributes)) element.setAttribute(name, value);
-  return element;
 }
 
 function buildPathsSvg(points: readonly Point[], orientation: RoadOrientation): SVGSVGElement {
@@ -88,17 +101,31 @@ function place(element: HTMLElement, point: Point): void {
   element.style.top = `${point.y * 100}%`;
 }
 
-function buildDecor(point: Point, kind: DecorKind): HTMLElement {
-  const item = createElement('span', { className: `decor ${kind}`, text: DECOR_EMOJI[kind] });
+/** Emoji for scenery; for "letter" items, a letter of the language or a digit, in turn. */
+function decorText(kind: DecorKind, index: number, pack: LanguagePack): string {
+  if (kind !== 'letter') return DECOR_EMOJI[kind];
+  const symbols = [...pack.letters.map((letter) => letter.boxText), ...DECOR_DIGITS];
+  return symbols[(index * 7) % symbols.length] ?? DECOR_DIGITS[0] ?? '';
+}
+
+function buildDecor(point: Point & { kind: DecorKind }, text: string): HTMLElement {
+  const item = createElement('span', { className: `decor ${point.kind}`, text });
   item.setAttribute('aria-hidden', 'true');
   place(item, point);
   return item;
 }
 
+function buildMarker(point: Point, symbol: string, className: string): HTMLElement {
+  const marker = createElement('span', { className: `marker ${className}`, text: symbol });
+  marker.setAttribute('aria-hidden', 'true');
+  place(marker, point);
+  return marker;
+}
+
 function buildStop(
   stop: StopDefinition,
   point: Point,
-  unlocked: boolean,
+  status: { unlocked: boolean; played: boolean; hasGuide: boolean },
   pack: LanguagePack,
   onOpen: (game: GameId) => void,
 ): HTMLElement {
@@ -112,7 +139,7 @@ function buildStop(
   button.style.setProperty('--top', stop.top);
   button.style.setProperty('--bottom', stop.bottom);
   button.style.setProperty('--edge', stop.edge);
-  button.disabled = !unlocked;
+  button.disabled = !status.unlocked;
   button.addEventListener('click', () => onOpen(stop.game));
 
   const speaker = createElement('button', { className: 'stop-speaker', text: '🔊', title: name });
@@ -121,10 +148,14 @@ function buildStop(
 
   const wrapper = createElement(
     'div',
-    { className: unlocked ? 'stop' : 'stop locked' },
+    { className: status.unlocked ? 'stop' : 'stop locked' },
     button,
     speaker,
   );
+  if (status.played) {
+    button.append(createElement('span', { className: 'stop-star', text: PLAYED_STAR }));
+  }
+  if (status.hasGuide) wrapper.append(buildGuide(pack));
   place(wrapper, point);
   return wrapper;
 }

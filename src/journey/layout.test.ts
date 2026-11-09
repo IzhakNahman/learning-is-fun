@@ -6,6 +6,7 @@ import {
   isClearOfRoad,
   layoutStops,
   placeDecor,
+  roadMarkers,
   sampleRoad,
   type RoadOrientation,
 } from './layout';
@@ -85,5 +86,31 @@ describe('placeDecor', () => {
       expect(item.x).toBeGreaterThan(0);
       expect(item.x).toBeLessThan(1);
     }
+  });
+});
+
+describe('roadMarkers', () => {
+  it.each(ORIENTATIONS)('keeps the %s start and finish markers inside the scene', (orientation) => {
+    const markers = roadMarkers(layoutStops(6, orientation, false), orientation);
+    for (const point of [markers.start, markers.finish]) {
+      expect(point.x).toBeGreaterThan(0);
+      expect(point.x).toBeLessThan(1);
+      expect(point.y).toBeGreaterThan(0);
+      expect(point.y).toBeLessThan(1);
+    }
+  });
+
+  it('puts the start below the first stop in portrait and the finish above the last', () => {
+    const points = layoutStops(6, 'portrait', false);
+    const markers = roadMarkers(points, 'portrait');
+    expect(markers.start.y).toBeGreaterThan(points[0]!.y);
+    expect(markers.finish.y).toBeLessThan(points[5]!.y);
+  });
+
+  it('puts the start before the first stop in landscape, also when mirrored', () => {
+    const left = layoutStops(6, 'landscape', false);
+    expect(roadMarkers(left, 'landscape').start.x).toBeLessThan(left[0]!.x);
+    const right = layoutStops(6, 'landscape', true);
+    expect(roadMarkers(right, 'landscape').start.x).toBeGreaterThan(right[0]!.x);
   });
 });

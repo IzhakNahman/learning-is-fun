@@ -21,7 +21,7 @@ export function initWordsGame(): void {
   renderWordsGame(getPack());
 }
 
-export function closeWordDetail(): void {
+function closeWordDetail(): void {
   beginPlayback();
   hide(byId('wdetail'));
 }

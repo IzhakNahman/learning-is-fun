@@ -10,7 +10,7 @@ export interface Point {
   y: number;
 }
 
-export type DecorKind = 'tree' | 'pine' | 'bush' | 'rock' | 'flower';
+export type DecorKind = 'tree' | 'pine' | 'bush' | 'flower' | 'letter';
 
 export interface DecorItem extends Point {
   kind: DecorKind;
@@ -27,9 +27,13 @@ const SWING = 0.2;
 const SCENE_ASPECT: Record<RoadOrientation, number> = { portrait: 0.55, landscape: 2.2 };
 /** Decorations stay at least this far (in fractions of the shorter side) from the road. */
 const DECOR_CLEARANCE = 0.1;
-const DECOR_COUNT: Record<RoadOrientation, number> = { portrait: 16, landscape: 18 };
+const DECOR_COUNT: Record<RoadOrientation, number> = { portrait: 18, landscape: 22 };
 const SAMPLES_PER_SEGMENT = 8;
-const DECOR_KINDS: readonly DecorKind[] = ['tree', 'pine', 'bush', 'rock', 'flower'];
+/** Letters appear twice so the scenery feels like a letter land. */
+const DECOR_KINDS: readonly DecorKind[] = ['tree', 'pine', 'bush', 'flower', 'letter', 'letter'];
+/** How far the start and finish markers sit beyond the first and last stop. */
+const MARKER_DISTANCE = 0.075;
+const MARKER_EDGE_LIMIT = 0.03;
 
 /**
  * Where each stop sits. The road starts at the bottom (portrait) or at the reading-start side
@@ -56,6 +60,30 @@ function positionAcrossRoad(index: number, count: number): number {
 
 const mirrorIf = (shouldMirror: boolean, value: number): number =>
   shouldMirror ? 1 - value : value;
+
+export interface RoadMarkers {
+  start: Point;
+  finish: Point;
+}
+
+/** Where the start sign and the finish flag stand: just past each end of the road. */
+export function roadMarkers(points: readonly Point[], orientation: RoadOrientation): RoadMarkers {
+  const first = points[0] ?? { x: 0.5, y: 0.9 };
+  const last = points[points.length - 1] ?? first;
+  const second = points[1] ?? first;
+  const beforeLast = points[points.length - 2] ?? last;
+  const axis = orientation === 'portrait' ? 'y' : 'x';
+  return {
+    start: moveAlong(first, Math.sign(first[axis] - second[axis]), axis),
+    finish: moveAlong(last, Math.sign(last[axis] - beforeLast[axis]), axis),
+  };
+}
+
+function moveAlong(point: Point, direction: number, axis: 'x' | 'y'): Point {
+  const moved = point[axis] + direction * MARKER_DISTANCE;
+  const limited = Math.min(1 - MARKER_EDGE_LIMIT, Math.max(MARKER_EDGE_LIMIT, moved));
+  return { ...point, [axis]: limited };
+}
 
 /** A smooth SVG path (in `PATH_VIEW_SIZE` units) through all the points, in order. */
 export function buildRoadPath(points: readonly Point[]): string {
@@ -122,7 +150,7 @@ export function buildRiverPath(points: readonly Point[], orientation: RoadOrient
   return `M ${mid + wave} -50 C ${mid - wave} ${size * 0.25}, ${mid + 2 * wave} ${size * 0.6}, ${mid - wave} ${size + 50}`;
 }
 
-/** Trees, rocks, and flowers placed deterministically, never on the road. */
+/** Trees, bushes, flowers and big letters placed deterministically, never on the road. */
 export function placeDecor(points: readonly Point[], orientation: RoadOrientation): DecorItem[] {
   const road = sampleRoad(points);
   const nextRandom = createRandom(points.length * 7919 + (orientation === 'portrait' ? 1 : 2));
@@ -148,7 +176,7 @@ export function isClearOfRoad(
 }
 
 /** Distance measured as if the scene were a square whose sides are its shorter dimension. */
-export function distanceOnScreen(a: Point, b: Point, orientation: RoadOrientation): number {
+function distanceOnScreen(a: Point, b: Point, orientation: RoadOrientation): number {
   const aspect = SCENE_ASPECT[orientation];
   const dx = orientation === 'portrait' ? (a.x - b.x) * aspect : a.x - b.x;
   const dy = orientation === 'portrait' ? a.y - b.y : (a.y - b.y) / aspect;

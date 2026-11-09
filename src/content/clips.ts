@@ -48,6 +48,11 @@ export function wellDonePart(pack: LanguagePack): SpokenPart {
   return { clipId: 'phrase-well-done', speech: pack.ui.sky.wellDoneSpeech };
 }
 
+/** What the little guide on the home road says when tapped. */
+export function guidePart(pack: LanguagePack): SpokenPart {
+  return { clipId: 'phrase-lets-play', speech: pack.ui.guide.speech };
+}
+
 export function finalSuffixPart(pack: LanguagePack): SpokenPart {
   return { clipId: 'letter-final', speech: pack.ui.letters.finalSuffixSpeech };
 }
@@ -100,6 +105,7 @@ export function listRecordingItems(pack: LanguagePack): RecordingItem[] {
   }
   const phraseParts = [
     wellDonePart(pack),
+    guidePart(pack),
     ...(['numbers', 'letters', 'trace', 'colors'] as const).map((game) =>
       instructionPart(pack, game),
     ),

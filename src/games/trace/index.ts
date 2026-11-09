@@ -3,12 +3,14 @@ import type { LanguageCode, LanguagePack } from '../../content';
 import { byId, clearChildren, createElement, wait } from '../../core/dom';
 import { getPack, onLanguageChange } from '../../core/i18n';
 import { beginPlayback, isCurrentPlayback } from '../../core/playback';
+import { registerScreen } from '../../core/router';
 import { playTapBlip } from '../../core/sfx';
 import { readSetting, writeSetting } from '../../core/storage';
 import { SPEECH_RATE, speakPartsInOrder } from '../../core/voice';
 import { showInstruction } from '../../ui/instruction';
 import { advanceAlong, isAtEnd, isNearDot, sampleStroke } from './engine';
-import { polyline, shapeIcon, svgElement } from './icon';
+import { svgElement } from '../../core/svg';
+import { polyline, shapeIcon } from './icon';
 import { resolveLetter } from './letters';
 import { ADDITION_COLOR, DRAWING_BOX } from './shapes';
 import type { LetterShape, Point, TraceFamily, TraceSet } from './shapes';
@@ -19,6 +21,14 @@ const PAUSE_BETWEEN_NAME_AND_SOUND_MS = 200;
 const TRACE_SETS: Record<LanguageCode, TraceSet> = { he: hebrewTrace, en: englishTrace };
 /** The first tile of every group: the group's basic shape, practised on its own. */
 const BASIC_KEY = 'basic';
+/** Sizes in drawing units (the drawing box is 100 wide). */
+const DOT_RADIUS = 6.5;
+const DOT_HALO_RADIUS = 9;
+const DOT_HALO_OPACITY = 0.3;
+const DOT_NUMBER_FONT_SIZE = 7;
+const DOT_NUMBER_OFFSET_Y = 2.5;
+/** How faded a stroke is until the child has drawn it. */
+const PENDING_STROKE_OPACITY = 0.22;
 
 interface ActiveItem {
   /** A letter key, or `BASIC_KEY` for the group's basic shape. */
@@ -44,6 +54,11 @@ export function initTraceGame(): void {
   svg.addEventListener('pointermove', onPointerMove);
   svg.addEventListener('pointerup', stopDragging);
   svg.addEventListener('pointercancel', stopDragging);
+  svg.addEventListener('lostpointercapture', stopDragging);
+  // Nothing may stay "held" when the page is hidden or the game is left.
+  window.addEventListener('blur', stopDragging);
+  document.addEventListener('visibilitychange', stopDragging);
+  registerScreen('trace', { leave: stopDragging });
   onLanguageChange(renderTraceGame);
   renderTraceGame(getPack());
 }
@@ -202,7 +217,9 @@ function draw(): void {
 
   item.samples.forEach((samples, index) => {
     const done = index < item.strokeIndex || item.finished;
-    drawing.append(polyline(samples, colorOfStroke(item, index), done ? 1 : 0.22));
+    drawing.append(
+      polyline(samples, colorOfStroke(item, index), done ? 1 : PENDING_STROKE_OPACITY),
+    );
   });
   if (item.finished) return;
 
@@ -216,9 +233,9 @@ function draw(): void {
       svgElement('circle', {
         cx: String(dot[0]),
         cy: String(dot[1]),
-        r: '9',
+        r: String(DOT_HALO_RADIUS),
         fill: color,
-        'fill-opacity': '0.3',
+        'fill-opacity': String(DOT_HALO_OPACITY),
       }),
     );
   }
@@ -226,7 +243,7 @@ function draw(): void {
     svgElement('circle', {
       cx: String(dot[0]),
       cy: String(dot[1]),
-      r: '6.5',
+      r: String(DOT_RADIUS),
       fill: '#ef9f27',
       stroke: '#854f0b',
       'stroke-width': '1',
@@ -234,8 +251,8 @@ function draw(): void {
   );
   const number = svgElement('text', {
     x: String(dot[0]),
-    y: String(dot[1] + 2.5),
-    'font-size': '7',
+    y: String(dot[1] + DOT_NUMBER_OFFSET_Y),
+    'font-size': String(DOT_NUMBER_FONT_SIZE),
     'text-anchor': 'middle',
     fill: '#412402',
     'font-weight': '700',

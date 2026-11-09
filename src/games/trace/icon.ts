@@ -1,18 +1,9 @@
+import { svgElement } from '../../core/svg';
 import type { LetterShape, Point } from './shapes';
 
-const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 export const LINE_WIDTH = 9;
 const ICON_LINE_WIDTH = 11;
 const ICON_PADDING = 7;
-
-export function svgElement<K extends keyof SVGElementTagNameMap>(
-  tag: K,
-  attributes: Record<string, string>,
-): SVGElementTagNameMap[K] {
-  const element = document.createElementNS(SVG_NAMESPACE, tag);
-  for (const [name, value] of Object.entries(attributes)) element.setAttribute(name, value);
-  return element;
-}
 
 export function polyline(
   points: readonly Point[],

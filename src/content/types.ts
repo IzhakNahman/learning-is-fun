@@ -75,9 +75,10 @@ export interface AboutSection {
 
 export interface UiText {
   appName: string;
-  chooseGame: string;
   aboutButton: string;
   credit: string;
+  /** The friendly guide on the home road: its label and what it says when tapped. */
+  guide: { label: string; speech: string };
   gameNames: Record<GameId, string>;
   /** How each game name is spoken (Hebrew: with niqqud). */
   gameNameSpeech: Record<GameId, string>;

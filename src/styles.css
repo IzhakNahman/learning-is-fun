@@ -95,7 +95,11 @@ button {
   justify-content: flex-start;
   padding: 0;
   isolation: isolate;
-  background: linear-gradient(180deg, #8be39a, #62cf7c);
+  /* sky at the top, meadow below */
+  background:
+    radial-gradient(ellipse 55% 14% at 20% 62%, rgba(255, 255, 255, 0.16), transparent),
+    radial-gradient(ellipse 50% 12% at 80% 82%, rgba(255, 255, 255, 0.14), transparent),
+    linear-gradient(180deg, #58b0ff 0%, #9fd8ff 16%, #d4f1ff 26%, #86df97 40%, #86df97 100%);
 }
 
 #home h1 {
@@ -106,14 +110,6 @@ button {
   text-shadow:
     0 0.7vmin 0 #2a78d6,
     0 1.2vmin 1.4vmin rgba(10, 60, 140, 0.35);
-}
-
-#home h2 {
-  margin: 0;
-  font-size: clamp(14px, 3.4vmin, 28px);
-  color: #fff;
-  font-weight: 700;
-  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.2);
 }
 
 #vnote {
@@ -275,18 +271,20 @@ button {
   gap: 0.8vmin;
   padding: 1.5vmin;
   min-height: 0;
+  /* children are sized from this panel (cqh/cqw), so they never spill out of it */
+  container-type: size;
   text-align: center;
   color: #1b4fa0;
 }
 
 .bignum {
-  font-size: 14vmin;
+  font-size: min(14vmin, 26cqh);
   font-weight: 900;
   line-height: 1;
 }
 
 .nname {
-  font-size: 6vmin;
+  font-size: min(6vmin, 11cqh);
   font-weight: 800;
   color: #a8326b;
 }
@@ -296,7 +294,7 @@ button {
   grid-template-columns: repeat(5, 1fr);
   gap: 1.2vmin;
   width: 100%;
-  max-width: 46vmin;
+  max-width: min(46vmin, 44cqh);
 }
 
 .ball {
@@ -327,19 +325,19 @@ button {
 }
 
 .lbig {
-  font-size: 26vmin;
+  font-size: min(26vmin, 40cqh);
   font-weight: 900;
   line-height: 1;
 }
 
 .lname {
-  font-size: 7vmin;
+  font-size: min(7vmin, 12cqh);
   font-weight: 800;
   color: #a8326b;
 }
 
 .lsnd {
-  font-size: 9vmin;
+  font-size: min(9vmin, 14cqh);
   font-weight: 800;
 }
 
@@ -814,7 +812,7 @@ button {
   }
 
   .split .grid {
-    flex: 2;
+    flex: 1.5;
   }
 
   #wgrid,
@@ -873,10 +871,6 @@ button {
 
   #home h1 {
     font-size: 8vh;
-  }
-
-  #home h2 {
-    font-size: 5vh;
   }
 
   #about .box {
@@ -959,10 +953,6 @@ button {
   #home h1 {
     font-size: 11vw;
   }
-
-  #home h2 {
-    font-size: 6vw;
-  }
 }
 
 /* Always-available home button inside the sky game */
@@ -1021,13 +1011,13 @@ button {
 }
 
 .cbig {
-  width: min(34vmin, 100%);
+  width: min(34vmin, 100%, 38cqh);
   aspect-ratio: 1;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 17vmin;
+  font-size: min(17vmin, 19cqh);
   line-height: 1;
   background: #fff;
   border: 0.8vmin solid rgba(0, 0, 0, 0.14);
@@ -1035,12 +1025,12 @@ button {
 }
 
 .cname {
-  font-size: 7vmin;
+  font-size: min(7vmin, 12cqh);
   font-weight: 900;
 }
 
 .cexample {
-  font-size: 5vmin;
+  font-size: min(5vmin, 9cqh);
   font-weight: 800;
   color: #a8326b;
   min-height: 1.2em;
@@ -1075,9 +1065,6 @@ button,
   gap: 0.4vmin;
   padding: calc(46px + var(--safe-top)) 12px 10px;
   text-align: center;
-  background: linear-gradient(180deg, #4aa8ff, #8fd3ff);
-  border-radius: 0 0 28px 28px;
-  box-shadow: 0 4px 0 rgba(0, 0, 0, 0.12);
   position: relative;
   z-index: 3;
 }
@@ -1103,6 +1090,7 @@ button,
   position: relative;
   margin-inline: auto;
 }
+
 .road-scene.portrait {
   width: 100%;
   max-width: 640px;
@@ -1111,8 +1099,9 @@ button,
 }
 .road-scene.landscape {
   height: 100%;
-  min-width: 100%;
-  aspect-ratio: 2.2;
+  /* fills the screen; only a very narrow landscape window scrolls sideways */
+  width: 100%;
+  min-width: 600px;
   margin-inline: 0;
 }
 .road-svg {
@@ -1153,11 +1142,77 @@ button,
   pointer-events: none;
   user-select: none;
 }
-.decor.flower,
-.decor.rock {
+.decor.flower {
   font-size: clamp(16px, 4.6vmin, 38px);
 }
+/* big faded letters and numbers: a "letter land" that stays behind the buttons */
+.decor.letter {
+  font-size: clamp(44px, 12vmin, 120px);
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.55);
+  text-shadow: 0 0.6vmin 0 rgba(0, 0, 0, 0.05);
+  rotate: -8deg;
+}
+.decor.letter:nth-of-type(even) {
+  rotate: 7deg;
+  color: rgba(255, 244, 168, 0.65);
+}
+.decor.letter:nth-of-type(3n) {
+  color: rgba(255, 190, 215, 0.6);
+}
+.marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-size: clamp(30px, 8vmin, 64px);
+  line-height: 1;
+  filter: drop-shadow(0 0.5vmin 0 rgba(0, 0, 0, 0.18));
+  pointer-events: none;
+}
+.stop-star {
+  position: absolute;
+  bottom: -1.4vmin;
+  inset-inline-start: -1.6vmin;
+  font-size: clamp(20px, 5vmin, 38px);
+  line-height: 1;
+  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.3));
+}
+/* the owl guide stands beside the next game to play */
+.guide {
+  position: absolute;
+  bottom: calc(var(--stop-width) * -0.08);
+  inset-inline-end: calc(var(--stop-width) * -0.38);
+  width: calc(var(--stop-width) * 0.44);
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  filter: drop-shadow(0 0.8vmin 0.4vmin rgba(0, 60, 20, 0.3));
+  animation: guide-hop 2.8s ease-in-out infinite;
+  z-index: 3;
+}
+.guide svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.guide:active {
+  scale: 0.92;
+}
+@keyframes guide-hop {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -1.2vmin;
+  }
+}
 .stop {
+  /* One size for every game button; capped so it stays reasonable on a big PC window. */
+  --stop-width: clamp(92px, 27vmin, 170px);
+  --stop-icon: clamp(46px, 13vmin, 96px);
+  --stop-font: clamp(13px, 3.6vmin, 25px);
   position: absolute;
   transform: translate(-50%, -50%);
   z-index: 2;
@@ -1170,14 +1225,19 @@ button,
   gap: 0.4vmin;
   border: 0;
   border-radius: 5vmin;
-  padding: 1.2vmin 2.2vmin 1.6vmin;
+  padding: 1.2vmin 1.2vmin 1.6vmin;
+  /* every game button is the same size, whatever its name */
+  box-sizing: border-box;
+  width: var(--stop-width);
   color: #fff;
-  font-size: clamp(13px, 3.6vmin, 30px);
+  font-size: var(--stop-font);
   font-weight: 900;
   line-height: 1.1;
   background: linear-gradient(180deg, var(--top), var(--bottom));
+  /* white rim so the button stands out from the scenery */
   box-shadow:
-    0 1vmin 0 var(--edge),
+    0 0 0 3px #fff,
+    0 1vmin 0 3px var(--edge),
     0 1.8vmin 2vmin rgba(10, 40, 100, 0.3),
     inset 0 0.4vmin 0 rgba(255, 255, 255, 0.45);
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
@@ -1194,16 +1254,20 @@ button,
   display: flex;
   align-items: center;
   justify-content: center;
-  width: clamp(48px, 13vmin, 110px);
-  height: clamp(48px, 13vmin, 110px);
+  width: var(--stop-icon);
+  height: var(--stop-icon);
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.28);
-  font-size: clamp(28px, 8vmin, 68px);
+  font-size: calc(var(--stop-icon) * 0.6);
   line-height: 1;
   white-space: nowrap;
 }
 .stop-button .gname {
-  max-width: 24vmin;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 2.2em;
   text-align: center;
 }
 .stop-speaker {
@@ -1249,20 +1313,13 @@ button,
   .home-head {
     padding-top: calc(6px + var(--safe-top));
   }
-  .home-head h2 {
-    display: none;
-  }
-  .stop-button .gname {
-    max-width: 22vh;
-  }
-  .stop-button .ic {
-    width: 15vh;
-    height: 15vh;
-    font-size: 9vh;
+  .stop {
+    --stop-width: 25vh;
+    --stop-icon: 15vh;
+    --stop-font: 4.4vh;
   }
   .stop-button {
-    font-size: 4.4vh;
-    padding: 1vh 1.6vh 1.2vh;
+    padding: 1vh 1vh 1.2vh;
     border-radius: 3vh;
   }
   .home-foot #vnote {
@@ -1434,4 +1491,111 @@ button,
 .tile.basic .shape-icon {
   width: 60%;
   height: 60%;
+}
+
+/* ---- home: the sky ---- */
+.home-sky {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 40%;
+  overflow: hidden;
+  /* the hills fade into the meadow, so there is no hard line where the layer ends */
+  mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+.home-sky .sun {
+  position: absolute;
+  top: calc(46px + var(--safe-top));
+  left: 12%;
+  width: clamp(56px, 11vmin, 120px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, #fffbd0, #ffd93b 65%);
+  box-shadow:
+    0 0 0 1.4vmin rgba(255, 230, 90, 0.35),
+    0 0 5vmin rgba(255, 220, 80, 0.7);
+}
+.home-sky .cloud {
+  position: absolute;
+  width: clamp(80px, 16vmin, 170px);
+  height: clamp(26px, 5vmin, 56px);
+  border-radius: 999px;
+  background: #fff;
+  opacity: 0.9;
+  animation: cloud-drift 120s linear infinite;
+}
+.home-sky .cloud::before,
+.home-sky .cloud::after {
+  content: '';
+  position: absolute;
+  background: #fff;
+  border-radius: 50%;
+}
+.home-sky .cloud::before {
+  width: 45%;
+  height: 120%;
+  top: -55%;
+  left: 18%;
+}
+.home-sky .cloud::after {
+  width: 34%;
+  height: 90%;
+  top: -35%;
+  left: 50%;
+}
+.home-sky .cloud:nth-child(2) {
+  top: 9vmin;
+  animation-duration: 160s;
+  animation-delay: -60s;
+}
+.home-sky .cloud:nth-child(3) {
+  top: 15vmin;
+  animation-duration: 200s;
+  animation-delay: -120s;
+  opacity: 0.7;
+}
+@keyframes cloud-drift {
+  from {
+    translate: -25vw 0;
+  }
+  to {
+    translate: 125vw 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-sky .cloud,
+  .guide {
+    animation: none;
+  }
+}
+@media (orientation: portrait) {
+  /* keep the sun clear of the title so the white text stays readable */
+  .home-sky .sun {
+    top: 120px;
+    left: auto;
+    right: 5%;
+    width: clamp(44px, 14vmin, 80px);
+  }
+}
+
+/* two rows of soft hills along the horizon, repeated across any window width */
+.home-sky::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: clamp(60px, 14vmin, 150px);
+  background:
+    radial-gradient(ellipse 30% 85% at 25% 100%, #96e6a4 98%, transparent 100%) 0 100% / 520px 70%
+      repeat-x,
+    radial-gradient(ellipse 30% 100% at 25% 100%, #a9edb4 98%, transparent 100%) 160px 100% / 700px
+      100% repeat-x;
+}
+
+/* Nearly square windows (tablets, narrow PC windows): six letter columns instead of four, so the tiles are not squashed */
+@media (orientation: portrait) and (min-aspect-ratio: 3/4) {
+  #wgrid,
+  #lgrid {
+    grid-template-columns: repeat(6, 1fr);
+  }
 }

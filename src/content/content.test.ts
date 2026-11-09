@@ -57,9 +57,9 @@ describe.each(LANGUAGE_ORDER)('language pack "%s"', (code) => {
     const hasNiqqud = (text: string): boolean => /[\u05B0-\u05C7]/u.test(text);
     const texts: string[] = [
       pack.ui.appName,
-      pack.ui.chooseGame,
       pack.ui.aboutButton,
       pack.ui.letters.finalSuffix,
+      pack.ui.guide.label,
       pack.ui.trace.placeholder,
       pack.ui.trace.baseLegend,
       pack.ui.trace.next,
