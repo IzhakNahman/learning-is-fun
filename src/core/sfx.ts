@@ -50,6 +50,20 @@ export const playCelebrationSound = (): void =>
   [523, 659, 784, 1047].forEach((frequency, index) =>
     playTone(frequency, 0.25, 'triangle', 0.2, index * 0.1),
   );
+/** How long the win sound lasts, so speech can wait for it to finish. */
+export const WIN_SOUND_SECONDS = 0.75;
+const WIN_NOTES_HZ = [523, 659, 784, 1047];
+const WIN_NOTE_GAP_SECONDS = 0.1;
+const WIN_SPARKLE_HZ = 1568;
+const WIN_SPARKLE_DELAY_SECONDS = 0.4;
+/** A happy rising fanfare with a little sparkle on top. `short` plays only the rising notes. */
+export function playWinSound(short = false): void {
+  WIN_NOTES_HZ.forEach((frequency, index) =>
+    playTone(frequency, 0.22, 'triangle', 0.16, index * WIN_NOTE_GAP_SECONDS),
+  );
+  if (short) return;
+  playTone(WIN_SPARKLE_HZ, 0.35, 'sine', 0.1, WIN_SPARKLE_DELAY_SECONDS);
+}
 export const playCountBlip = (step: number): void =>
   playTone(400 + step * 25, 0.08, 'triangle', 0.12);
 export const playTapBlip = (step: number): void => playTone(500 + step * 30, 0.1, 'triangle', 0.15);

@@ -4,7 +4,7 @@ import { byId, clearChildren, createElement, wait } from '../../core/dom';
 import { getPack, onLanguageChange } from '../../core/i18n';
 import { beginPlayback, isCurrentPlayback } from '../../core/playback';
 import { registerScreen } from '../../core/router';
-import { playTapBlip } from '../../core/sfx';
+import { WIN_SOUND_SECONDS, playTapBlip, playWinSound } from '../../core/sfx';
 import { readSetting, writeSetting } from '../../core/storage';
 import { SPEECH_RATE, speakPartsInOrder } from '../../core/voice';
 import { showInstruction } from '../../ui/instruction';
@@ -18,6 +18,8 @@ import { englishTrace } from './shapes.en';
 import { hebrewTrace } from './shapes.he';
 
 const PAUSE_BETWEEN_NAME_AND_SOUND_MS = 200;
+const PAUSE_AFTER_WIN_SOUND_MS = 150;
+const WIN_SOUND_MS = WIN_SOUND_SECONDS * 1000;
 const TRACE_SETS: Record<LanguageCode, TraceSet> = { he: hebrewTrace, en: englishTrace };
 /** The first tile of every group: the group's basic shape, practised on its own. */
 const BASIC_KEY = 'basic';
@@ -297,10 +299,12 @@ function stopDragging(): void {
 
 function finishStroke(item: ActiveItem): void {
   item.dragging = false;
-  playTapBlip(item.strokeIndex);
+  const isLastStroke = item.strokeIndex + 1 >= item.samples.length;
+  // The last stroke gets the win sound instead of the small blip.
+  if (!isLastStroke) playTapBlip(item.strokeIndex);
   item.strokeIndex += 1;
   item.sampleIndex = 0;
-  if (item.strokeIndex >= item.samples.length) finishItem(item);
+  if (isLastStroke) finishItem(item);
   else draw();
 }
 
@@ -311,7 +315,9 @@ function finishItem(item: ActiveItem): void {
   writeSetting(storageKey(pack), [...completed].join(','));
   renderItemTiles(pack);
   draw();
-  if (item.itemKey !== BASIC_KEY) void sayLetter(item.itemKey);
+  const isBasicShape = item.itemKey === BASIC_KEY;
+  playWinSound(isBasicShape);
+  if (!isBasicShape) void sayLetter(item.itemKey);
 }
 
 async function sayLetter(letterKey: string): Promise<void> {
@@ -322,6 +328,9 @@ async function sayLetter(letterKey: string): Promise<void> {
   const soundPart = letterSoundPart(pack, resolved.letterKey);
   if (!nameParts || !soundPart) return;
   const playbackId = beginPlayback();
+  // First the win sound, then the letter name and its sound.
+  await wait(WIN_SOUND_MS + PAUSE_AFTER_WIN_SOUND_MS);
+  if (!isCurrentPlayback(playbackId)) return;
   const nameSequence = resolved.isFinal ? [nameParts, finalSuffixPart(pack)] : [nameParts];
   await speakPartsInOrder(nameSequence, playbackId, SPEECH_RATE.LETTER_NAME);
   if (!isCurrentPlayback(playbackId)) return;
