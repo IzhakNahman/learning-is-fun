@@ -158,9 +158,45 @@ export function makeDraggable(element: HTMLElement, options: DraggableOptions): 
     }, SLIDE_BACK_MS);
   };
 
+  // Window-level listeners catch a release that happens outside the element (or after the
+  // browser dropped pointer capture), so a drag can never get stuck to the finger or mouse.
+  const onWindowRelease = (event: PointerEvent): void =>
+    finish(event, event.type === 'pointercancel');
+  const onWindowBlur = (): void => abort();
+  const onVisibilityChange = (): void => {
+    if (document.hidden) abort();
+  };
+  const listenOnWindow = (): void => {
+    window.addEventListener('pointerup', onWindowRelease, true);
+    window.addEventListener('pointercancel', onWindowRelease, true);
+    window.addEventListener('blur', onWindowBlur);
+    document.addEventListener('visibilitychange', onVisibilityChange);
+  };
+  const stopListeningOnWindow = (): void => {
+    window.removeEventListener('pointerup', onWindowRelease, true);
+    window.removeEventListener('pointercancel', onWindowRelease, true);
+    window.removeEventListener('blur', onWindowBlur);
+    document.removeEventListener('visibilitychange', onVisibilityChange);
+  };
+
+  /** Lets go without choosing anything: a dragged element slides back home. */
+  const abort = (): void => {
+    if (activePointer === null) return;
+    const pointer = activePointer;
+    activePointer = null;
+    stopListeningOnWindow();
+    if (element.hasPointerCapture?.(pointer)) element.releasePointerCapture(pointer);
+    if (moved) {
+      slideBack();
+      return;
+    }
+    element.classList.remove('dragging');
+  };
+
   const finish = (event: PointerEvent, cancelled: boolean): void => {
     if (event.pointerId !== activePointer) return;
     activePointer = null;
+    stopListeningOnWindow();
     if (element.hasPointerCapture?.(event.pointerId)) {
       element.releasePointerCapture(event.pointerId);
     }
@@ -176,14 +212,16 @@ export function makeDraggable(element: HTMLElement, options: DraggableOptions): 
       options.onTap?.();
       return;
     }
+    if (cancelled) {
+      slideBack();
+      return;
+    }
     const targets = options.targets();
-    const index = cancelled
-      ? -1
-      : pickTarget(
-          { x: event.clientX, y: event.clientY },
-          targets.map((target) => target.getBoundingClientRect()),
-          DROP_SLACK_PX,
-        );
+    const index = pickTarget(
+      { x: event.clientX, y: event.clientY },
+      targets.map((target) => target.getBoundingClientRect()),
+      DROP_SLACK_PX,
+    );
     const target = targets[index];
     if (target && options.onDrop(target)) {
       element.classList.remove('dragging');
@@ -195,9 +233,16 @@ export function makeDraggable(element: HTMLElement, options: DraggableOptions): 
   };
 
   element.addEventListener('pointerdown', (event) => {
-    if (activePointer !== null || element.dataset.locked === '1') return;
+    if (element.dataset.locked === '1') return;
     if (event.pointerType === 'mouse' && event.button !== 0) return;
+    if (activePointer !== null) {
+      // Still holding the old pointer for real: ignore a second finger.
+      if (element.hasPointerCapture?.(activePointer)) return;
+      // The old drag was left hanging (its release was lost): drop it and start fresh.
+      abort();
+    }
     activePointer = event.pointerId;
+    listenOnWindow();
     start = { x: event.clientX, y: event.clientY };
     moved = false;
     element.style.transition = '';
@@ -207,6 +252,11 @@ export function makeDraggable(element: HTMLElement, options: DraggableOptions): 
 
   element.addEventListener('pointermove', (event) => {
     if (event.pointerId !== activePointer) return;
+    // The mouse button was released somewhere we did not hear about.
+    if (event.pointerType === 'mouse' && event.buttons === 0) {
+      abort();
+      return;
+    }
     const dx = event.clientX - start.x;
     const dy = event.clientY - start.y;
     if (!moved && Math.hypot(dx, dy) < TAP_DISTANCE_PX) return;
@@ -217,4 +267,7 @@ export function makeDraggable(element: HTMLElement, options: DraggableOptions): 
 
   element.addEventListener('pointerup', (event) => finish(event, false));
   element.addEventListener('pointercancel', (event) => finish(event, true));
+  element.addEventListener('lostpointercapture', (event) => {
+    if (event.pointerId === activePointer) abort();
+  });
 }

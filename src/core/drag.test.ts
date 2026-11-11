@@ -129,3 +129,71 @@ describe('a tap that answers at once', () => {
     expect(source.classList.contains('selected')).toBe(false);
   });
 });
+
+describe('a drag never gets stuck', () => {
+  const setup = () => {
+    const source = document.createElement('div');
+    const target = document.createElement('div');
+    document.body.append(source, target);
+    let captured: number | null = null;
+    source.setPointerCapture = (id: number) => {
+      captured = id;
+    };
+    source.hasPointerCapture = (id: number) => captured === id;
+    source.releasePointerCapture = () => {
+      captured = null;
+    };
+    const calls: string[] = [];
+    makeDraggable(source, {
+      targets: () => [target],
+      onDrop: () => {
+        calls.push('drop');
+        return true;
+      },
+      onReject: () => calls.push('reject'),
+    });
+    const fire = (type: string, init: PointerEventInit, on: EventTarget = source): void => {
+      on.dispatchEvent(new PointerEvent(type, { pointerId: 1, bubbles: true, ...init }));
+    };
+    const loseCapture = (): void => {
+      captured = null;
+    };
+    return { source, calls, fire, loseCapture };
+  };
+  const mouse = { pointerType: 'mouse', button: 0, buttons: 1 };
+
+  it('slides back when the mouse button was released somewhere we did not hear about', () => {
+    const { source, calls, fire } = setup();
+    fire('pointerdown', { ...mouse, clientX: 0, clientY: 0 });
+    fire('pointermove', { ...mouse, clientX: 50, clientY: 0 });
+    expect(source.classList.contains('dragging')).toBe(true);
+    fire('pointermove', { ...mouse, buttons: 0, clientX: 60, clientY: 0 });
+    expect(source.classList.contains('dragging')).toBe(false);
+    expect(calls).toEqual([]);
+  });
+
+  it('finishes on a release heard by the window, outside the element', () => {
+    const { source, fire } = setup();
+    fire('pointerdown', { ...mouse, clientX: 0, clientY: 0 });
+    fire('pointermove', { ...mouse, clientX: 50, clientY: 0 });
+    fire('pointerup', { ...mouse, clientX: 5000, clientY: 5000 }, window);
+    expect(source.classList.contains('dragging')).toBe(false);
+  });
+
+  it('lets go when the window loses focus', () => {
+    const { source, fire } = setup();
+    fire('pointerdown', { ...mouse, clientX: 0, clientY: 0 });
+    fire('pointermove', { ...mouse, clientX: 50, clientY: 0 });
+    window.dispatchEvent(new Event('blur'));
+    expect(source.classList.contains('dragging')).toBe(false);
+  });
+
+  it('starts a new drag when the old one was left hanging', () => {
+    const { source, fire, loseCapture } = setup();
+    fire('pointerdown', { ...mouse, clientX: 0, clientY: 0 });
+    loseCapture();
+    fire('pointerdown', { ...mouse, pointerId: 2, clientX: 0, clientY: 0 });
+    fire('pointermove', { ...mouse, pointerId: 2, clientX: 50, clientY: 0 });
+    expect(source.classList.contains('dragging')).toBe(true);
+  });
+});

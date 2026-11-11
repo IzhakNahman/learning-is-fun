@@ -1087,9 +1087,9 @@ button,
   text-align: center;
 }
 .road-wrap {
-  position: relative;
-  flex: 1;
-  min-height: 0;
+  /* the road fills the whole home screen; the title and the footer float over it */
+  position: absolute;
+  inset: 0;
 }
 .road-scroll {
   height: 100%;
@@ -1118,67 +1118,12 @@ button,
 .road-scene.landscape {
   height: 100%;
   /* each stop gets its own room, so a longer road simply scrolls sideways */
-  width: max(100%, calc(var(--stops, 6) * var(--stop-size) * 0.75));
+  width: max(100vw, calc(var(--stops, 6) * var(--stop-size) * 1.45));
   margin-inline: 0;
 }
 .road-wrap:has(.landscape) .road-scroll {
   /* a sideways road only scrolls sideways */
   overflow-y: hidden;
-}
-.road-svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-.road-svg path {
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.road-svg .river {
-  stroke: #5db4ff;
-  stroke-width: 7vmin;
-  opacity: 0.9;
-}
-.road-svg .road-edge {
-  stroke: #b8863b;
-  stroke-width: 10.5vmin;
-}
-.road-svg .road-surface {
-  stroke: #ffe39a;
-  stroke-width: 8.5vmin;
-}
-.road-svg .road-dashes {
-  stroke: #fff;
-  stroke-width: 0.8vmin;
-  stroke-dasharray: 2.4vmin 2.8vmin;
-  opacity: 0.85;
-}
-.decor {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  font-size: clamp(22px, 7vmin, 60px);
-  line-height: 1;
-  pointer-events: none;
-  user-select: none;
-}
-.decor.flower {
-  font-size: clamp(16px, 4.6vmin, 38px);
-}
-/* big faded letters and numbers: a "letter land" that stays behind the buttons */
-.decor.letter {
-  font-size: clamp(44px, 12vmin, 120px);
-  font-weight: 900;
-  color: rgba(255, 255, 255, 0.32);
-  rotate: -8deg;
-}
-.decor.letter:nth-of-type(even) {
-  rotate: 7deg;
-  color: rgba(255, 255, 255, 0.32);
-}
-.decor.letter:nth-of-type(3n) {
-  color: rgba(255, 255, 255, 0.32);
 }
 .marker {
   position: absolute;
@@ -1237,6 +1182,10 @@ button,
   50% {
     translate: 0 -1.2vmin;
   }
+}
+.stop.has-guide {
+  /* the owl must not hide behind the next stop */
+  z-index: 4;
 }
 .stop {
   --stop-width: var(--stop-size);
@@ -1527,105 +1476,6 @@ button,
 .tile.basic .shape-icon {
   width: 60%;
   height: 60%;
-}
-
-/* ---- home: the sky ---- */
-.home-sky {
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 40%;
-  overflow: hidden;
-  /* the hills fade into the meadow, so there is no hard line where the layer ends */
-  mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
-  pointer-events: none;
-  z-index: 0;
-}
-.home-sky .sun {
-  position: absolute;
-  top: calc(46px + var(--safe-top));
-  left: 12%;
-  width: clamp(56px, 11vmin, 120px);
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(circle at 40% 40%, #fffbd0, #ffd93b 65%);
-  box-shadow:
-    0 0 0 1.4vmin rgba(255, 230, 90, 0.35),
-    0 0 5vmin rgba(255, 220, 80, 0.7);
-}
-.home-sky .cloud {
-  position: absolute;
-  width: clamp(80px, 16vmin, 170px);
-  height: clamp(26px, 5vmin, 56px);
-  border-radius: 999px;
-  background: #fff;
-  opacity: 0.9;
-  animation: cloud-drift 120s linear infinite;
-}
-.home-sky .cloud::before,
-.home-sky .cloud::after {
-  content: '';
-  position: absolute;
-  background: #fff;
-  border-radius: 50%;
-}
-.home-sky .cloud::before {
-  width: 45%;
-  height: 120%;
-  top: -55%;
-  left: 18%;
-}
-.home-sky .cloud::after {
-  width: 34%;
-  height: 90%;
-  top: -35%;
-  left: 50%;
-}
-.home-sky .cloud:nth-child(2) {
-  top: 9vmin;
-  animation-duration: 160s;
-  animation-delay: -60s;
-}
-.home-sky .cloud:nth-child(3) {
-  top: 15vmin;
-  animation-duration: 200s;
-  animation-delay: -120s;
-  opacity: 0.7;
-}
-@keyframes cloud-drift {
-  from {
-    translate: -25vw 0;
-  }
-  to {
-    translate: 125vw 0;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .home-sky .cloud,
-  .guide {
-    animation: none;
-  }
-}
-@media (orientation: portrait) {
-  /* keep the sun clear of the title so the white text stays readable */
-  .home-sky .sun {
-    top: 120px;
-    left: auto;
-    right: 5%;
-    width: clamp(44px, 14vmin, 80px);
-  }
-}
-
-/* two rows of soft hills along the horizon, repeated across any window width */
-.home-sky::after {
-  content: '';
-  position: absolute;
-  inset: auto 0 0 0;
-  height: clamp(60px, 14vmin, 150px);
-  background:
-    radial-gradient(ellipse 30% 85% at 25% 100%, #96e6a4 98%, transparent 100%) 0 100% / 520px 70%
-      repeat-x,
-    radial-gradient(ellipse 30% 100% at 25% 100%, #a9edb4 98%, transparent 100%) 160px 100% / 700px
-      100% repeat-x;
 }
 
 /* Nearly square windows (tablets, narrow PC windows): six letter columns instead of four, so the tiles are not squashed */
@@ -2085,49 +1935,6 @@ button,
   direction: rtl;
 }
 
-/* soft fades where there is more road to scroll to */
-.road-wrap::before,
-.road-wrap::after {
-  content: '';
-  position: absolute;
-  z-index: 4;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.25s;
-}
-.road-wrap:has(.landscape)::before,
-.road-wrap:has(.landscape)::after {
-  top: 0;
-  bottom: 0;
-  width: clamp(24px, 6vw, 70px);
-}
-.road-wrap:has(.landscape)::before {
-  left: 0;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.75), transparent);
-}
-.road-wrap:has(.landscape)::after {
-  right: 0;
-  background: linear-gradient(270deg, rgba(255, 255, 255, 0.75), transparent);
-}
-.road-wrap:has(.portrait)::before,
-.road-wrap:has(.portrait)::after {
-  left: 0;
-  right: 0;
-  height: clamp(18px, 4vh, 40px);
-}
-.road-wrap:has(.portrait)::before {
-  top: 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.75), transparent);
-}
-.road-wrap:has(.portrait)::after {
-  bottom: 0;
-  background: linear-gradient(0deg, rgba(255, 255, 255, 0.75), transparent);
-}
-.road-wrap.more-before::before,
-.road-wrap.more-after::after {
-  opacity: 1;
-}
-
 /* the owl button that scrolls back to the next game */
 .road-jump {
   position: absolute;
@@ -2190,4 +1997,307 @@ button,
     opacity: 1;
     pointer-events: auto;
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .guide {
+    animation: none;
+  }
+}
+
+/* ---- home: bubbles with letters and numbers that float up and pop when tapped ---- */
+.balloon-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+}
+.balloon {
+  position: absolute;
+  top: 100%;
+  left: var(--left);
+  width: clamp(64px, 13vmin, 104px);
+  margin-inline-start: calc(clamp(64px, 13vmin, 104px) / -2);
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  pointer-events: auto;
+  touch-action: manipulation;
+  will-change: translate;
+  animation: balloon-rise var(--rise) linear var(--delay) 1 both;
+}
+.balloon-sway {
+  position: relative;
+  display: block;
+  height: 100%;
+  animation: balloon-sway var(--sway-time) ease-in-out infinite alternate;
+}
+.balloon-shape {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 0.3vmin solid rgba(255, 255, 255, 0.7);
+  /* a soap bubble: two shine spots, a coloured rim and a faint rainbow */
+  background:
+    radial-gradient(circle at 30% 24%, rgba(255, 255, 255, 0.95) 0 5%, rgba(255, 255, 255, 0) 13%),
+    radial-gradient(circle at 72% 80%, rgba(255, 255, 255, 0.5) 0 7%, rgba(255, 255, 255, 0) 15%),
+    radial-gradient(circle at 50% 50%, rgba(var(--tint), 0.06) 52%, rgba(var(--tint), 0.34) 100%),
+    linear-gradient(
+      135deg,
+      rgba(255, 120, 200, 0.14),
+      rgba(120, 200, 255, 0.14) 50%,
+      rgba(160, 255, 190, 0.14)
+    );
+  box-shadow:
+    inset 0 0 1.6vmin rgba(255, 255, 255, 0.6),
+    inset -0.8vmin -1vmin 2vmin rgba(var(--tint), 0.28),
+    0 0.5vmin 1.4vmin rgba(0, 0, 0, 0.06);
+}
+.balloon-letter {
+  color: var(--bottom-color);
+  font-size: clamp(30px, 7vmin, 56px);
+  font-weight: 900;
+  line-height: 1;
+  opacity: 0.95;
+  text-shadow:
+    0 0 0.8vmin rgba(255, 255, 255, 0.9),
+    0 0.2vmin 0 rgba(255, 255, 255, 0.6);
+  user-select: none;
+}
+.balloon.popped {
+  pointer-events: none;
+  animation-play-state: paused;
+}
+.balloon.popped .balloon-shape {
+  animation: balloon-pop 0.42s ease-out forwards;
+}
+.balloon-dot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: clamp(6px, 1.4vmin, 11px);
+  margin: -0.7vmin 0 0 -0.7vmin;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  background: var(--dot-color);
+  opacity: 0.8;
+  pointer-events: none;
+  animation: balloon-dot 0.42s ease-out forwards;
+}
+@keyframes balloon-rise {
+  from {
+    translate: 0 0;
+  }
+  to {
+    translate: 0 calc(-100vh - 100%);
+  }
+}
+@keyframes balloon-sway {
+  from {
+    translate: calc(var(--sway) * -1) 0;
+  }
+  to {
+    translate: var(--sway) 0;
+  }
+}
+@keyframes balloon-pop {
+  35% {
+    scale: 1.18;
+    opacity: 0.9;
+  }
+  to {
+    scale: 1.4;
+    opacity: 0;
+  }
+}
+@keyframes balloon-dot {
+  to {
+    translate: var(--dx) var(--dy);
+    scale: 0;
+  }
+}
+/* "reduce motion": the bubbles stand still at a random height instead of floating */
+.balloon-layer.still .balloon {
+  top: var(--rest-y);
+  animation: none;
+}
+.balloon-layer.still .balloon-sway {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .balloon,
+  .balloon-sway {
+    animation: none;
+  }
+}
+
+/* ---- home: the sky world behind the ladder ---- */
+#home {
+  /* room kept free under the title and above the footer */
+  --head-h: 150px;
+  --foot-h: 64px;
+}
+@media (orientation: landscape) {
+  #home {
+    --head-h: 96px;
+  }
+}
+@media (orientation: landscape) and (max-height: 500px) {
+  #home {
+    --head-h: 56px;
+    --foot-h: 24px;
+  }
+}
+.ladder-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.road-world {
+  position: relative;
+  box-sizing: border-box;
+  padding-top: var(--head-h);
+  padding-bottom: var(--foot-h);
+}
+.road-world.portrait {
+  width: 100%;
+  min-height: 100%;
+  background: linear-gradient(
+    0deg,
+    #86df97 0 6%,
+    #bff0cf 9%,
+    #d4f1ff 13%,
+    #9fd8ff 40%,
+    #58b0ff 100%
+  );
+}
+.road-world.landscape {
+  width: max-content;
+  height: 100%;
+  background: linear-gradient(
+    0deg,
+    #86df97 0 9%,
+    #bff0cf 12%,
+    #d4f1ff 17%,
+    #9fd8ff 50%,
+    #58b0ff 100%
+  );
+}
+/* two rows of soft hills along the horizon, repeated across any width */
+.road-world::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(var(--foot-h) + 0.5vmin);
+  height: clamp(60px, 14vmin, 150px);
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 30% 85% at 25% 100%, #96e6a4 98%, transparent 100%) 0 100% / 520px 70%
+      repeat-x,
+    radial-gradient(ellipse 30% 100% at 25% 100%, #a9edb4 98%, transparent 100%) 160px 100% / 700px
+      100% repeat-x;
+}
+.world-sun {
+  position: absolute;
+  width: clamp(56px, 11vmin, 120px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle at 40% 40%, #fffbd0, #ffd93b 65%);
+  box-shadow:
+    0 0 0 1.4vmin rgba(255, 230, 90, 0.35),
+    0 0 5vmin rgba(255, 220, 80, 0.7);
+}
+.world-sun.portrait {
+  top: calc(var(--head-h) + 4%);
+  right: 8%;
+  width: clamp(44px, 14vmin, 80px);
+}
+.world-sun.landscape {
+  top: calc(var(--head-h) + 2%);
+  right: 3%;
+}
+.world-cloud {
+  position: absolute;
+  translate: -50% -50%;
+  width: calc(clamp(80px, 16vmin, 170px) * var(--cloud-scale, 1));
+  height: calc(clamp(26px, 5vmin, 56px) * var(--cloud-scale, 1));
+  border-radius: 999px;
+  background: #fff;
+  opacity: 0.9;
+  pointer-events: none;
+}
+.world-cloud::before,
+.world-cloud::after {
+  content: '';
+  position: absolute;
+  background: #fff;
+  border-radius: 50%;
+}
+.world-cloud::before {
+  width: 42%;
+  height: 120%;
+  top: -55%;
+  left: 18%;
+}
+.world-cloud::after {
+  width: 34%;
+  height: 90%;
+  top: -35%;
+  left: 50%;
+}
+/* the title and the footer fade softly into the sky and the grass behind them */
+.home-head::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 -40px 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(88, 176, 255, 0.96) 0%,
+    rgba(88, 176, 255, 0.9) 55%,
+    rgba(88, 176, 255, 0) 100%
+  );
+}
+.home-foot {
+  position: relative;
+  z-index: 3;
+  margin-top: auto;
+}
+.home-foot::before {
+  content: '';
+  position: absolute;
+  inset: -34px 0 0 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(134, 223, 151, 0) 0%, rgba(134, 223, 151, 0.96) 45%);
+}
+/* a white cloud under the finish flag so it stands out against the sky */
+.marker.finish {
+  isolation: isolate;
+}
+.marker.finish::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: 58%;
+  left: 50%;
+  translate: -50% 0;
+  width: 190%;
+  height: 62%;
+  border-radius: 999px;
+  background: #fff;
+  opacity: 0.92;
 }

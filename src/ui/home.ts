@@ -10,6 +10,7 @@ import { STOPS, stopsFor } from '../journey/stops';
 import type { GameId } from '../content';
 import { openPolicy } from '../journey/unlock';
 import { openAbout } from './about';
+import { buildBalloonLayer } from './balloons';
 import { buildRoad } from './road';
 import { setUpRoadScrolling } from './roadScroll';
 
@@ -59,7 +60,6 @@ function renderHome(pack: LanguagePack): void {
 
   home.append(
     createElement('button', { id: 'abtn', text: `ℹ️ ${pack.ui.aboutButton}`, onClick: openAbout }),
-    buildSky(),
     buildLanguageSwitch(pack),
     createElement(
       'div',
@@ -67,6 +67,7 @@ function renderHome(pack: LanguagePack): void {
       createElement('h1', { text: `☁️ ${pack.ui.appName} ☁️` }),
     ),
     road,
+    buildBalloonLayer(pack, orientation),
     createElement(
       'div',
       { className: 'home-foot' },
@@ -78,17 +79,6 @@ function renderHome(pack: LanguagePack): void {
   setUpRoadScrolling(road, orientation, nextGameToPlay(stopsFor(pack), playedGames), pack);
   updateVoiceNote(voiceNote, pack);
   setTimeout(() => updateVoiceNote(voiceNote, pack), VOICE_CHECK_DELAY_MS);
-}
-
-/** Sun and slowly drifting clouds behind the title. */
-function buildSky(): HTMLElement {
-  const sky = createElement('div', { className: 'home-sky' });
-  sky.setAttribute('aria-hidden', 'true');
-  sky.append(
-    createElement('span', { className: 'sun' }),
-    ...[0, 1, 2].map(() => createElement('span', { className: 'cloud' })),
-  );
-  return sky;
 }
 
 function buildLanguageSwitch(current: LanguagePack): HTMLElement {

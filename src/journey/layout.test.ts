@@ -1,15 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  PATH_VIEW_SIZE,
-  buildRiverPath,
-  buildRoadPath,
-  isClearOfRoad,
-  layoutStops,
-  placeDecor,
-  roadMarkers,
-  sampleRoad,
-  type RoadOrientation,
-} from './layout';
+import { buildLadder, layoutStops, roadMarkers, type RoadOrientation } from './layout';
 
 const ORIENTATIONS: RoadOrientation[] = ['portrait', 'landscape'];
 
@@ -49,47 +39,54 @@ describe('layoutStops', () => {
   });
 });
 
-describe('road path', () => {
-  it('is empty without points', () => {
-    expect(buildRoadPath([])).toBe('');
-    expect(sampleRoad([])).toEqual([]);
-    expect(buildRiverPath([], 'portrait')).toBe('');
+describe('buildLadder', () => {
+  it('is empty with fewer than two points', () => {
+    expect(buildLadder([], 10, 20)).toEqual({ rails: [], rungs: [] });
+    expect(buildLadder([{ x: 0, y: 0 }], 10, 20)).toEqual({ rails: [], rungs: [] });
   });
 
-  it('starts at the first stop and has one curve per gap', () => {
-    const points = layoutStops(5, 'portrait', false);
-    const path = buildRoadPath(points);
-    expect(path.startsWith(`M ${points[0]!.x * PATH_VIEW_SIZE}`)).toBe(true);
-    expect(path.match(/C/g)).toHaveLength(4);
-    expect(path).not.toMatch(/NaN/);
+  it('has two rails per piece, each halfWidth from the centre line', () => {
+    const { rails } = buildLadder(
+      [
+        { x: 0, y: 0 },
+        { x: 100, y: 0 },
+      ],
+      10,
+      20,
+    );
+    expect(rails).toEqual([
+      { x1: 0, y1: -10, x2: 100, y2: -10 },
+      { x1: 0, y1: 10, x2: 100, y2: 10 },
+    ]);
   });
 
-  it('samples pass through the stops', () => {
-    const points = layoutStops(3, 'landscape', false);
-    const samples = sampleRoad(points);
-    expect(samples[0]).toEqual(points[0]);
-    expect(samples[samples.length - 1]!.x).toBeCloseTo(points[2]!.x);
+  it('puts a rung every rungSpacing, starting half a step in', () => {
+    const { rungs } = buildLadder(
+      [
+        { x: 0, y: 0 },
+        { x: 100, y: 0 },
+      ],
+      10,
+      20,
+    );
+    expect(rungs.map((rung) => rung.x1)).toEqual([10, 30, 50, 70, 90]);
+    expect(rungs[0]).toEqual({ x1: 10, y1: -10, x2: 10, y2: 10 });
   });
 
-  it.each(ORIENTATIONS)('draws a %s river without NaN', (orientation) => {
-    const river = buildRiverPath(layoutStops(5, orientation, false), orientation);
-    expect(river).toMatch(/^M /);
-    expect(river).not.toMatch(/NaN/);
+  it('skips pieces of zero length', () => {
+    const same = { x: 5, y: 5 };
+    expect(buildLadder([same, same], 10, 20)).toEqual({ rails: [], rungs: [] });
   });
-});
 
-describe('placeDecor', () => {
-  it.each(ORIENTATIONS)('is deterministic and keeps %s scenery off the road', (orientation) => {
-    const points = layoutStops(5, orientation, false);
-    const first = placeDecor(points, orientation);
-    expect(placeDecor(points, orientation)).toEqual(first);
-    expect(first.length).toBeGreaterThan(5);
-    const road = sampleRoad(points);
-    for (const item of first) {
-      expect(isClearOfRoad(item, road, orientation)).toBe(true);
-      expect(item.x).toBeGreaterThan(0);
-      expect(item.x).toBeLessThan(1);
-    }
+  it.each(ORIENTATIONS)('makes a ladder through every %s stop without NaN', (orientation) => {
+    const points = layoutStops(6, orientation, false).map((point) => ({
+      x: point.x * 800,
+      y: point.y * 600,
+    }));
+    const { rails, rungs } = buildLadder(points, 30, 25);
+    expect(rails).toHaveLength(10);
+    expect(rungs.length).toBeGreaterThan(10);
+    expect(JSON.stringify([rails, rungs])).not.toMatch(/null/);
   });
 });
 

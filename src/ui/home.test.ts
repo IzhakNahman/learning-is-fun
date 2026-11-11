@@ -40,6 +40,14 @@ describe('home road', () => {
     setLanguage('he');
   });
 
+  it('draws the sky world with a ladder, bubbles and the owl beside the next game', () => {
+    expect(document.querySelector('.road-world .world-sun')).not.toBeNull();
+    expect(document.querySelectorAll('.road-world .world-cloud').length).toBeGreaterThan(0);
+    expect(document.querySelector('.ladder-svg')).not.toBeNull();
+    expect(document.querySelectorAll('#home .balloon').length).toBeGreaterThan(0);
+    expect(document.querySelector('.stop.has-guide .guide')).not.toBeNull();
+  });
+
   it('offers niqqud in Hebrew only', () => {
     expect(document.querySelector('.stop-button[data-game="niqqud"]')).not.toBeNull();
     setLanguage('en');
