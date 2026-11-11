@@ -1,8 +1,11 @@
 import type {
   ColorEntry,
+  GameId,
   LanguagePack,
   LetterEntry,
   NumberNames,
+  LookalikeEntry,
+  ShapeEntry,
   SpokenPart,
   UiText,
   WordEntry,
@@ -223,29 +226,110 @@ const numbers: NumberNames = {
   shown: numberNames.map((name) => name.charAt(0).toUpperCase() + name.slice(1)),
 };
 
+const shapes: ShapeEntry[] = [
+  shape('circle', 'Circle'),
+  shape('square', 'Square'),
+  shape('rectangle', 'Rectangle'),
+  shape('triangle', 'Triangle'),
+  shape('rhombus', 'Diamond'),
+  shape('oval', 'Oval'),
+  shape('star', 'Star'),
+  shape('heart', 'Heart'),
+];
+
+function shape(id: string, name: string): ShapeEntry {
+  return { id, name, nameSpeech: name };
+}
+
+function lookalike(id: string, emoji: string, shapeId: string, name: string): LookalikeEntry {
+  return { id, emoji, shapeId, name, nameSpeech: name };
+}
+
+const lookalikes: LookalikeEntry[] = [
+  lookalike('ball', '⚽', 'circle', 'Ball'),
+  lookalike('cookie', '🍪', 'circle', 'Cookie'),
+  lookalike('moon', '🌕', 'circle', 'Moon'),
+  lookalike('window', '🪟', 'square', 'Window'),
+  lookalike('waffle', '🧇', 'square', 'Waffle'),
+  lookalike('door', '🚪', 'rectangle', 'Door'),
+  lookalike('phone', '📱', 'rectangle', 'Phone'),
+  lookalike('chocolate', '🍫', 'rectangle', 'Chocolate bar'),
+  lookalike('pizza', '🍕', 'triangle', 'Pizza'),
+  lookalike('tent', '⛺', 'triangle', 'Tent'),
+  lookalike('cheese', '🧀', 'triangle', 'Cheese'),
+  lookalike('kite', '🪁', 'rhombus', 'Kite'),
+  lookalike('gem', '💎', 'rhombus', 'Gem'),
+  lookalike('egg', '🥚', 'oval', 'Egg'),
+  lookalike('avocado', '🥑', 'oval', 'Avocado'),
+  lookalike('rugby', '🏉', 'oval', 'Rugby ball'),
+];
+
+const AVAILABLE_GAMES: readonly GameId[] = [
+  'numbers',
+  'colors',
+  'shapes',
+  'lookalike',
+  'letters',
+  'count',
+  'trace',
+  'mix',
+  'words',
+  'starts',
+  'add',
+  'sky',
+];
+
+const GAME_NAMES: Record<GameId, string> = {
+  numbers: 'Meet the Numbers',
+  colors: 'Meet the Colours',
+  shapes: 'Meet the Shapes',
+  lookalike: 'Find the Shape',
+  letters: 'Meet the Letters',
+  count: 'How Many?',
+  trace: 'Write the Letters',
+  mix: 'Mix the Colours',
+  words: 'Word Treasure',
+  starts: 'First Letter',
+  add: 'Add It Up',
+  sky: 'Word Game',
+  // Niqqud is a Hebrew writing feature; this name is never shown in English.
+  niqqud: 'Meet the Niqqud',
+};
+
 const ui: UiText = {
   appName: 'Learning is Fun',
   aboutButton: 'About',
   guide: { label: "Let's play!", speech: "Let's play!" },
   credit: 'Created by Izhak Nachman · All rights reserved ©',
-  gameNames: {
-    numbers: 'Meet the Numbers',
-    letters: 'Meet the Letters',
-    trace: 'Write the Letters',
-    colors: 'Meet the Colours',
-    words: 'Word Treasure',
-    sky: 'Word Game',
-  },
-  gameNameSpeech: {
-    numbers: 'Meet the Numbers',
-    letters: 'Meet the Letters',
-    trace: 'Write the Letters',
-    colors: 'Meet the Colours',
-    words: 'Word Treasure',
-    sky: 'Word Game',
-  },
+  nextGame: 'Next game',
+  gameNames: GAME_NAMES,
+  gameNameSpeech: GAME_NAMES,
   numbers: { placeholder: 'Tap a number', placeholderSpeech: 'Tap a number' },
   colors: { placeholder: 'Tap a colour', placeholderSpeech: 'Tap a colour' },
+  shapes: { placeholder: 'Tap a shape', placeholderSpeech: 'Tap a shape' },
+  lookalike: {
+    placeholder: 'Drag the picture to the shape it looks like',
+    placeholderSpeech: 'Drag the picture to the shape it looks like',
+  },
+  count: {
+    placeholder: 'Drag the right number',
+    placeholderSpeech: 'Drag the right number',
+  },
+  mix: {
+    placeholder: 'Drag the colour you get',
+    placeholderSpeech: 'Drag the colour you get',
+  },
+  starts: {
+    placeholder: 'Drag the picture to the letter it starts with',
+    placeholderSpeech: 'Drag the picture to the letter it starts with',
+  },
+  add: {
+    placeholder: 'Drag each answer to its sum',
+    placeholderSpeech: 'Drag each answer to its sum',
+  },
+  // Not shown in English (see GAME_NAMES).
+  niqqud: { placeholder: 'Tap a vowel mark', placeholderSpeech: 'Tap a vowel mark' },
+  phrases: { plus: 'plus', equals: 'equals', makes: 'makes' },
   letters: {
     placeholder: 'Tap a letter',
     placeholderSpeech: 'Tap a letter',
@@ -297,9 +381,19 @@ const ui: UiText = {
         body: 'The name and the sound of every letter. In English the sound is the phonics sound used for reading. Children see and hear each letter again and again at their own pace.',
       },
       {
+        icon: '🧺',
+        game: 'count',
+        body: 'A group of objects appears. The child counts them (tapping an object counts out loud) and drags the right number onto the group. It starts with small numbers up to 5, then goes up to 10. A mistake simply slides the number back, and after two mistakes the right number lights up.',
+      },
+      {
         icon: '✏️',
         game: 'trace',
         body: 'The child writes the letter themselves by dragging a dot along the line, from the top down or from left to right. Capital letters are grouped by stroke type, in the same order handwriting programmes use: straight lines first, then curves, then diagonals. Each group starts with its basic shape to practise, and the first stroke is coloured by group and the next strokes in another colour. After each letter the child hears its name and sound.',
+      },
+      {
+        icon: '🌈',
+        game: 'mix',
+        body: 'Two colours appear on one side of the board and the child drags the colour you get when they are mixed (for example red plus yellow makes orange).',
       },
       {
         icon: '🎨',
@@ -307,14 +401,39 @@ const ui: UiText = {
         body: 'The child taps a colour, sees it big, hears its name and gets an example of something in that colour (for example red – apple). This is how the ten basic colours are learned at the child’s own pace.',
       },
       {
+        icon: '🔷',
+        game: 'shapes',
+        body: 'The child taps a shape, sees it big, and hears its name.',
+      },
+      {
+        icon: '🍕',
+        game: 'lookalike',
+        body: 'A picture appears (for example a pizza) and the child drags it to the shape it looks like (a triangle). It starts with two shapes to choose from, then three, including look-alikes such as a square and a rectangle. Tapping the picture says its name, and after a right answer the child hears the picture and the shape.',
+      },
+      {
         icon: '🖼️',
         game: 'words',
         body: 'One word and picture for every letter. Each tap plays a fixed sequence: letter name, letter, sound, word. This helps children connect the first sound of a word with its letter, which is the foundation of reading.',
       },
       {
+        icon: '🔠',
+        game: 'starts',
+        body: 'A picture appears and the child drags it to the letter the word starts with. After the right answer the child hears the word and the letter sound.',
+      },
+      {
+        icon: '➕',
+        game: 'add',
+        body: 'Three adding sums made with objects (for example two plus one) and three answers. The child drags each answer onto its sum. It starts with answers up to 5, then up to 10, and every sum is said out loud.',
+      },
+      {
         icon: '🎁',
         game: 'sky',
         body: 'A practice game in a 3D sky world. With the left hand the child moves the character (an on-screen joystick, or W A S D on a keyboard), and with the right hand punches a box (an on-screen button, or K). The child looks for the box with the right letter to complete a word. Every box breaks after 3 punches and three dots on the box show how many punches are left. After every letter the game pauses and says the letter name and its sound, and after every word it shows the picture and says the word. The timer stops while the child listens, and mistakes are never punished: a wrong letter still breaks and is explained. At the end the child counts the words they collected.',
+      },
+      {
+        icon: '◌ָ',
+        game: 'niqqud',
+        body: 'Hebrew only.',
       },
     ],
     skills:
@@ -360,6 +479,10 @@ export const englishPack: LanguagePack = {
   finalLetters: [],
   words,
   colors,
+  shapes,
+  lookalikes,
+  niqqud: [],
+  availableGames: AVAILABLE_GAMES,
   numbers,
   maxCount: 26,
   splitFirstLetter,

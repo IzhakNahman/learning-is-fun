@@ -1,6 +1,6 @@
 # Recording list – עִבְרִית
 
-136 short clips. Save each as <clip id>.mp3 (m4a/wav also fine) into public/audio/he/
+195 short clips. Save each as <clip id>.mp3 (m4a/wav also fine) into public/audio/he/
 and list the ids in public/audio/he/manifest.json. Clips that are missing fall back to the device voice.
 
 ## game names
@@ -8,11 +8,18 @@ and list the ids in public/audio/he/manifest.json. Clips that are missing fall b
 | clip id | say |
 |---|---|
 | game-name-numbers | הַכָּרַת הַמִּסְפָּרִים |
-| game-name-letters | הַכָּרַת הָאוֹתִיּוֹת |
-| game-name-trace | כְּתִיבַת אוֹתִיּוֹת |
 | game-name-colors | הַכָּרַת הַצְּבָעִים |
+| game-name-shapes | הַכָּרַת הַצּוּרוֹת |
+| game-name-lookalike | מוֹצְאִים צוּרָה |
+| game-name-letters | הַכָּרַת הָאוֹתִיּוֹת |
+| game-name-count | כַּמָּה יֵשׁ? |
+| game-name-trace | כְּתִיבַת אוֹתִיּוֹת |
+| game-name-mix | עוֹרְבִים צְבָעִים |
 | game-name-words | אוֹצַר מִלִּים |
+| game-name-starts | אוֹת הַתְּחָלָה |
+| game-name-add | מְחַבְּרִים |
 | game-name-sky | מִשְׂחַק הַמִּלִּים |
+| game-name-niqqud | הַכָּרַת הַנִּקּוּד |
 
 ## letter names
 
@@ -104,6 +111,63 @@ and list the ids in public/audio/he/manifest.json. Clips that are missing fall b
 | color-gray | אָפֹר |
 | color-phrase-gray | פִּיל אָפֹר |
 
+## shapes
+
+| clip id | say |
+|---|---|
+| shape-circle | עִגּוּל |
+| shape-square | רִבּוּעַ |
+| shape-rectangle | מַלְבֵּן |
+| shape-triangle | מְשֻׁלָּשׁ |
+| shape-rhombus | מְעֻיָּן |
+| shape-oval | אֶלִּיפְּסָה |
+| shape-star | כּוֹכָב |
+| shape-heart | לֵב |
+
+## objects
+
+| clip id | say |
+|---|---|
+| object-ball | כַּדּוּר |
+| object-cookie | עוּגִיָּה |
+| object-moon | יָרֵחַ |
+| object-window | חַלּוֹן |
+| object-waffle | וָפֶל |
+| object-door | דֶּלֶת |
+| object-phone | טֵלֵפוֹן |
+| object-chocolate | שׁוֹקוֹלָד |
+| object-pizza | פִּיצָה |
+| object-tent | אֹהֶל |
+| object-cheese | גְּבִינָה |
+| object-kite | עֲפִיפוֹן |
+| object-gem | יַהֲלוֹם |
+| object-egg | בֵּיצָה |
+| object-avocado | אָבוֹקָדוֹ |
+| object-rugby | כַּדּוּר רַגְבִּי |
+
+## niqqud
+
+| clip id | say |
+|---|---|
+| niqqud-name-kamatz | קָמָץ |
+| niqqud-sound-kamatz | אָ |
+| niqqud-name-patach | פַּתַח |
+| niqqud-sound-patach | אַ |
+| niqqud-name-tzere | צֵרֵי |
+| niqqud-sound-tzere | אֵ |
+| niqqud-name-segol | סֶגּוֹל |
+| niqqud-sound-segol | אֶ |
+| niqqud-name-hiriq | חִירִיק |
+| niqqud-sound-hiriq | אִ |
+| niqqud-name-holam | חוֹלָם |
+| niqqud-sound-holam | אוֹ |
+| niqqud-name-shuruk | שׁוּרוּק |
+| niqqud-sound-shuruk | אוּ |
+| niqqud-name-kubutz | קֻבּוּץ |
+| niqqud-sound-kubutz | אֻ |
+| niqqud-name-shva | שְׁוָא |
+| niqqud-sound-shva | אֶ |
+
 ## words
 
 | clip id | say |
@@ -164,10 +228,20 @@ and list the ids in public/audio/he/manifest.json. Clips that are missing fall b
 |---|---|
 | phrase-well-done | כָּל הַכָּבוֹד! |
 | phrase-lets-play | בּוֹאוּ נְשַׂחֵק! |
+| phrase-plus | וְעוֹד |
+| phrase-equals | שָׁוֶה |
+| phrase-makes | יוֹצֵא |
 | phrase-tap-numbers | לִחְצוּ עַל מִסְפָּר |
 | phrase-tap-letters | לִחְצוּ עַל אוֹת |
 | phrase-tap-trace | בִּחְרוּ אוֹת לִכְתִיבָה |
 | phrase-tap-colors | לִחְצוּ עַל צֶבַע |
+| phrase-tap-shapes | לִחְצוּ עַל צוּרָה |
+| phrase-tap-lookalike | גִּרְרוּ אֶת הַתְּמוּנָה לַצּוּרָה שֶׁדּוֹמָה לָהּ |
+| phrase-tap-count | גִּרְרוּ אֶת הַמִּסְפָּר הַנָּכוֹן |
+| phrase-tap-mix | גִּרְרוּ אֶת הַצֶּבַע שֶׁיּוֹצֵא |
+| phrase-tap-starts | גִּרְרוּ אֶת הַתְּמוּנָה לָאוֹת שֶׁבָּהּ הִיא מַתְחִילָה |
+| phrase-tap-add | גִּרְרוּ אֶת הַתּוֹצָאָה לַתַּרְגִּיל |
+| phrase-tap-niqqud | לִחְצוּ עַל נִקּוּד |
 | phrase-game-over | הַמִּשְׂחָק הִסְתַּיֵּם, הִשַּׂגְתָּ |
 | phrase-0-words | אֶפֶס מִלִּים |
 | phrase-1-word | מִלָּה אַחַת |

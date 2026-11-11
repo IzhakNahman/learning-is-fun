@@ -64,6 +64,11 @@ export function playWinSound(short = false): void {
   if (short) return;
   playTone(WIN_SPARKLE_HZ, 0.35, 'sine', 0.1, WIN_SPARKLE_DELAY_SECONDS);
 }
+/** A soft, friendly "try again" (not a harsh buzz): two gentle falling notes. */
+export const playTryAgainSound = (): void => {
+  playTone(392, 0.14, 'sine', 0.14);
+  playTone(330, 0.2, 'sine', 0.14, 0.12);
+};
 export const playCountBlip = (step: number): void =>
   playTone(400 + step * 25, 0.08, 'triangle', 0.12);
 export const playTapBlip = (step: number): void => playTone(500 + step * 30, 0.1, 'triangle', 0.15);

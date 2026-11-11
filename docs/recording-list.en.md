@@ -1,6 +1,6 @@
 # Recording list – English
 
-144 short clips. Save each as <clip id>.mp3 (m4a/wav also fine) into public/audio/en/
+183 short clips. Save each as <clip id>.mp3 (m4a/wav also fine) into public/audio/en/
 and list the ids in public/audio/en/manifest.json. Clips that are missing fall back to the device voice.
 
 ## game names
@@ -8,10 +8,16 @@ and list the ids in public/audio/en/manifest.json. Clips that are missing fall b
 | clip id | say |
 |---|---|
 | game-name-numbers | Meet the Numbers |
-| game-name-letters | Meet the Letters |
-| game-name-trace | Write the Letters |
 | game-name-colors | Meet the Colours |
+| game-name-shapes | Meet the Shapes |
+| game-name-lookalike | Find the Shape |
+| game-name-letters | Meet the Letters |
+| game-name-count | How Many? |
+| game-name-trace | Write the Letters |
+| game-name-mix | Mix the Colours |
 | game-name-words | Word Treasure |
+| game-name-starts | First Letter |
+| game-name-add | Add It Up |
 | game-name-sky | Word Game |
 
 ## letter names
@@ -105,6 +111,40 @@ and list the ids in public/audio/en/manifest.json. Clips that are missing fall b
 | color-gray | gray |
 | color-phrase-gray | gray elephant |
 
+## shapes
+
+| clip id | say |
+|---|---|
+| shape-circle | Circle |
+| shape-square | Square |
+| shape-rectangle | Rectangle |
+| shape-triangle | Triangle |
+| shape-rhombus | Diamond |
+| shape-oval | Oval |
+| shape-star | Star |
+| shape-heart | Heart |
+
+## objects
+
+| clip id | say |
+|---|---|
+| object-ball | Ball |
+| object-cookie | Cookie |
+| object-moon | Moon |
+| object-window | Window |
+| object-waffle | Waffle |
+| object-door | Door |
+| object-phone | Phone |
+| object-chocolate | Chocolate bar |
+| object-pizza | Pizza |
+| object-tent | Tent |
+| object-cheese | Cheese |
+| object-kite | Kite |
+| object-gem | Gem |
+| object-egg | Egg |
+| object-avocado | Avocado |
+| object-rugby | Rugby ball |
+
 ## words
 
 | clip id | say |
@@ -173,10 +213,19 @@ and list the ids in public/audio/en/manifest.json. Clips that are missing fall b
 |---|---|
 | phrase-well-done | Very good! |
 | phrase-lets-play | Let's play! |
+| phrase-plus | plus |
+| phrase-equals | equals |
+| phrase-makes | makes |
 | phrase-tap-numbers | Tap a number |
 | phrase-tap-letters | Tap a letter |
 | phrase-tap-trace | Pick a letter to write |
 | phrase-tap-colors | Tap a colour |
+| phrase-tap-shapes | Tap a shape |
+| phrase-tap-lookalike | Drag the picture to the shape it looks like |
+| phrase-tap-count | Drag the right number |
+| phrase-tap-mix | Drag the colour you get |
+| phrase-tap-starts | Drag the picture to the letter it starts with |
+| phrase-tap-add | Drag each answer to its sum |
 | phrase-game-over | Game over! You got |
 | phrase-0-words | zero words |
 | phrase-1-word | one word |

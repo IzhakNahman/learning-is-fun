@@ -35,8 +35,15 @@ describe('home road', () => {
   it('redraws the road in the other language', () => {
     const before = document.querySelector('.stop-button .gname')!.textContent;
     setLanguage('en');
-    expect(document.querySelectorAll('.stop-button')).toHaveLength(STOPS.length);
+    expect(document.querySelectorAll('.stop-button')).toHaveLength(STOPS.length - 1);
     expect(document.querySelector('.stop-button .gname')!.textContent).not.toBe(before);
+    setLanguage('he');
+  });
+
+  it('offers niqqud in Hebrew only', () => {
+    expect(document.querySelector('.stop-button[data-game="niqqud"]')).not.toBeNull();
+    setLanguage('en');
+    expect(document.querySelector('.stop-button[data-game="niqqud"]')).toBeNull();
     setLanguage('he');
   });
 });

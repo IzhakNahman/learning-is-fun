@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { packs } from '../content';
-import { STOPS } from './stops';
+import { STOPS, stopsFor } from './stops';
 
 describe('STOPS', () => {
   it('lists every game exactly once', () => {
@@ -16,5 +16,29 @@ describe('STOPS', () => {
         expect(colour).toMatch(/^#[0-9a-f]{6}$/i);
       }
     }
+  });
+
+  it('puts the games in order from easiest to hardest', () => {
+    expect(STOPS.map((stop) => stop.game)).toEqual([
+      'numbers',
+      'colors',
+      'shapes',
+      'lookalike',
+      'letters',
+      'count',
+      'trace',
+      'mix',
+      'words',
+      'starts',
+      'add',
+      'sky',
+      'niqqud',
+    ]);
+  });
+
+  it('follows each language pack: Hebrew has niqqud, English does not', () => {
+    expect(stopsFor(packs.he).map((stop) => stop.game)).toContain('niqqud');
+    expect(stopsFor(packs.en).map((stop) => stop.game)).not.toContain('niqqud');
+    expect(stopsFor(packs.en)).toHaveLength(STOPS.length - 1);
   });
 });

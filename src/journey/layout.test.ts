@@ -28,9 +28,13 @@ describe('layoutStops', () => {
     expect(points[0]!.y).toBeGreaterThan(points[4]!.y);
   });
 
-  it('starts on the left in landscape, and on the right for right-to-left', () => {
+  it('starts on the left in landscape, in every language', () => {
     expect(layoutStops(5, 'landscape', false)[0]!.x).toBeLessThan(0.5);
-    expect(layoutStops(5, 'landscape', true)[0]!.x).toBeGreaterThan(0.5);
+    expect(layoutStops(5, 'landscape', true)[0]!.x).toBeLessThan(0.5);
+  });
+
+  it('starts on the right in portrait for right-to-left', () => {
+    expect(layoutStops(5, 'portrait', true)[0]!.x).toBeGreaterThan(0.5);
   });
 
   it('zig-zags across the road', () => {
@@ -107,10 +111,10 @@ describe('roadMarkers', () => {
     expect(markers.finish.y).toBeLessThan(points[5]!.y);
   });
 
-  it('puts the start before the first stop in landscape, also when mirrored', () => {
-    const left = layoutStops(6, 'landscape', false);
-    expect(roadMarkers(left, 'landscape').start.x).toBeLessThan(left[0]!.x);
-    const right = layoutStops(6, 'landscape', true);
-    expect(roadMarkers(right, 'landscape').start.x).toBeGreaterThan(right[0]!.x);
+  it('puts the start before the first stop in landscape, in every language', () => {
+    for (const isRtl of [false, true]) {
+      const points = layoutStops(6, 'landscape', isRtl);
+      expect(roadMarkers(points, 'landscape').start.x).toBeLessThan(points[0]!.x);
+    }
   });
 });

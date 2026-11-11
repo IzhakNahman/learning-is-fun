@@ -1,4 +1,4 @@
-import type { LanguagePack } from '../content';
+import type { AboutSection, LanguagePack } from '../content';
 import { byId, clearChildren, createElement, hide, show } from '../core/dom';
 import { getPack, onLanguageChange } from '../core/i18n';
 
@@ -27,7 +27,11 @@ function renderAbout(pack: LanguagePack): void {
     createElement('h3', { text: about.title }),
     createElement('p', { text: about.intro }),
   );
-  for (const section of about.sections) {
+  const roadOrder = (section: AboutSection): number => pack.availableGames.indexOf(section.game);
+  const sections = about.sections
+    .filter((section) => roadOrder(section) >= 0)
+    .sort((first, second) => roadOrder(first) - roadOrder(second));
+  for (const section of sections) {
     box.append(
       createElement('h4', { text: `${section.icon} ${pack.ui.gameNames[section.game]}` }),
       createElement('p', { text: section.body }),

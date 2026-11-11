@@ -1,4 +1,12 @@
-import type { ColorEntry, GameId, LanguagePack, SpokenPart } from './types';
+import type {
+  ColorEntry,
+  GameId,
+  LanguagePack,
+  LookalikeEntry,
+  NiqqudEntry,
+  ShapeEntry,
+  SpokenPart,
+} from './types';
 
 /** Zero-padded number clip id, e.g. 7 -> "num-07". */
 export function numberClipId(count: number): string {
@@ -37,9 +45,46 @@ export function colorPhrasePart(color: ColorEntry): SpokenPart {
   return { clipId: `color-phrase-${color.id}`, speech: color.example.speech };
 }
 
-export type InstructionGame = 'numbers' | 'letters' | 'trace' | 'colors';
+export function shapeNamePart(shape: ShapeEntry): SpokenPart {
+  return { clipId: `shape-${shape.id}`, speech: shape.nameSpeech };
+}
 
-/** The "tap a ..." instruction shown before the child picks something. */
+export function lookalikeNamePart(entry: LookalikeEntry): SpokenPart {
+  return { clipId: `object-${entry.id}`, speech: entry.nameSpeech };
+}
+
+export function niqqudNamePart(entry: NiqqudEntry): SpokenPart {
+  return { clipId: `niqqud-name-${entry.id}`, speech: entry.nameSpeech };
+}
+
+export function niqqudSoundPart(entry: NiqqudEntry): SpokenPart {
+  return { clipId: `niqqud-sound-${entry.id}`, speech: entry.soundSpeech };
+}
+
+export type PhraseWord = 'plus' | 'equals' | 'makes';
+
+/** A little linking word, e.g. the "plus" in "two plus one equals three". */
+export function phraseWordPart(pack: LanguagePack, word: PhraseWord): SpokenPart {
+  return { clipId: `phrase-${word}`, speech: pack.ui.phrases[word] };
+}
+
+/** Games that start with an instruction line (their clip is `phrase-tap-<game>`). */
+export const INSTRUCTION_GAMES = [
+  'numbers',
+  'letters',
+  'trace',
+  'colors',
+  'shapes',
+  'lookalike',
+  'count',
+  'mix',
+  'starts',
+  'add',
+  'niqqud',
+] as const;
+export type InstructionGame = (typeof INSTRUCTION_GAMES)[number];
+
+/** The "tap a ..." / "drag the ..." instruction shown before the child plays. */
 export function instructionPart(pack: LanguagePack, game: InstructionGame): SpokenPart {
   return { clipId: `phrase-tap-${game}`, speech: pack.ui[game].placeholderSpeech };
 }
@@ -67,13 +112,22 @@ export interface RecordingItem {
   clipId: string;
   speech: string;
   group:
-    'game names' | 'letter names' | 'letter sounds' | 'colors' | 'words' | 'numbers' | 'phrases';
+    | 'game names'
+    | 'letter names'
+    | 'letter sounds'
+    | 'colors'
+    | 'shapes'
+    | 'objects'
+    | 'niqqud'
+    | 'words'
+    | 'numbers'
+    | 'phrases';
 }
 
 /** Every clip the app can play for a language. The recording lists are generated from this. */
 export function listRecordingItems(pack: LanguagePack): RecordingItem[] {
   const items: RecordingItem[] = [];
-  for (const game of ['numbers', 'letters', 'trace', 'colors', 'words', 'sky'] as const) {
+  for (const game of pack.availableGames) {
     items.push({ ...gameNamePart(pack, game), group: 'game names' });
   }
   for (const entry of pack.letters) {
@@ -97,6 +151,16 @@ export function listRecordingItems(pack: LanguagePack): RecordingItem[] {
     items.push({ ...colorNamePart(color), group: 'colors' });
     items.push({ ...colorPhrasePart(color), group: 'colors' });
   }
+  for (const shape of pack.shapes) {
+    items.push({ ...shapeNamePart(shape), group: 'shapes' });
+  }
+  for (const entry of pack.lookalikes) {
+    items.push({ ...lookalikeNamePart(entry), group: 'objects' });
+  }
+  for (const entry of pack.niqqud) {
+    items.push({ ...niqqudNamePart(entry), group: 'niqqud' });
+    items.push({ ...niqqudSoundPart(entry), group: 'niqqud' });
+  }
   for (const entry of pack.words) {
     items.push({ clipId: `word-${entry.id}`, speech: entry.speech, group: 'words' });
   }
@@ -106,7 +170,8 @@ export function listRecordingItems(pack: LanguagePack): RecordingItem[] {
   const phraseParts = [
     wellDonePart(pack),
     guidePart(pack),
-    ...(['numbers', 'letters', 'trace', 'colors'] as const).map((game) =>
+    ...(['plus', 'equals', 'makes'] as const).map((word) => phraseWordPart(pack, word)),
+    ...INSTRUCTION_GAMES.filter((game) => pack.availableGames.includes(game)).map((game) =>
       instructionPart(pack, game),
     ),
     ...[0, 1, 2, 3].flatMap((count) => pack.gameOverParts(count)),

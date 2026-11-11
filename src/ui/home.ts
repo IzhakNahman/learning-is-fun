@@ -5,12 +5,13 @@ import { getPack, onLanguageChange, setLanguage } from '../core/i18n';
 import { navigateTo, registerScreen } from '../core/router';
 import { findVoiceFor } from '../core/speech';
 import type { RoadOrientation } from '../journey/layout';
-import { loadPlayedGames, markGamePlayed } from '../journey/played';
-import { STOPS } from '../journey/stops';
+import { loadPlayedGames, markGamePlayed, nextGameToPlay } from '../journey/played';
+import { STOPS, stopsFor } from '../journey/stops';
 import type { GameId } from '../content';
 import { openPolicy } from '../journey/unlock';
 import { openAbout } from './about';
-import { buildRoad, scrollRoadToStart } from './road';
+import { buildRoad } from './road';
+import { setUpRoadScrolling } from './roadScroll';
 
 const VOICE_CHECK_DELAY_MS = 900;
 /** Swap this for `sequentialPolicy(...)` to make the games open one by one. */
@@ -25,7 +26,7 @@ export function initHome(): void {
   renderHome(getPack());
 }
 
-/** Opening a game remembers it, so the road can show a star and point at the next one. */
+/** Opening a game remembers it, so the road can show a ✓ and point at the next one. */
 function openGame(game: GameId): void {
   markGamePlayed(game, STOPS);
   navigateTo(game);
@@ -43,11 +44,12 @@ function renderHome(pack: LanguagePack): void {
   clearChildren(home);
 
   const orientation = currentOrientation();
+  const playedGames = loadPlayedGames(STOPS);
   const road = buildRoad({
     pack,
     orientation,
     isUnlocked: unlockPolicy,
-    playedGames: loadPlayedGames(STOPS),
+    playedGames,
     onOpen: openGame,
   });
   const voiceNote = createElement('div', { id: 'vnote' });
@@ -70,7 +72,7 @@ function renderHome(pack: LanguagePack): void {
     ),
   );
 
-  scrollRoadToStart(road, orientation);
+  setUpRoadScrolling(road, orientation, nextGameToPlay(stopsFor(pack), playedGames), pack);
   updateVoiceNote(voiceNote, pack);
   setTimeout(() => updateVoiceNote(voiceNote, pack), VOICE_CHECK_DELAY_MS);
 }

@@ -27,24 +27,27 @@ const SWING = 0.2;
 const SCENE_ASPECT: Record<RoadOrientation, number> = { portrait: 0.55, landscape: 2.2 };
 /** Decorations stay at least this far (in fractions of the shorter side) from the road. */
 const DECOR_CLEARANCE = 0.1;
-const DECOR_COUNT: Record<RoadOrientation, number> = { portrait: 18, landscape: 22 };
+const DECOR_COUNT: Record<RoadOrientation, number> = { portrait: 12, landscape: 15 };
+/** Roads with more stops than this are longer, so they get proportionally more scenery. */
+const DECOR_BASE_STOPS = 8;
 const SAMPLES_PER_SEGMENT = 8;
 /** Letters appear twice so the scenery feels like a letter land. */
-const DECOR_KINDS: readonly DecorKind[] = ['tree', 'pine', 'bush', 'flower', 'letter', 'letter'];
+const DECOR_KINDS: readonly DecorKind[] = ['tree', 'pine', 'bush', 'flower', 'letter'];
 /** How far the start and finish markers sit beyond the first and last stop. */
 const MARKER_DISTANCE = 0.075;
 const MARKER_EDGE_LIMIT = 0.03;
 
 /**
- * Where each stop sits. The road starts at the bottom (portrait) or at the reading-start side
- * (landscape: left, or right in a right-to-left language) and zig-zags to the end.
+ * Where each stop sits. The road starts at the bottom (portrait) or on the left (landscape, in
+ * every language: a road is not text) and zig-zags to the end. In a right-to-left language the
+ * portrait zig-zag starts on the right.
  */
 export function layoutStops(count: number, orientation: RoadOrientation, isRtl: boolean): Point[] {
   return Array.from({ length: count }, (_, index) => {
     const along = positionAlongRoad(index, count);
     const across = positionAcrossRoad(index, count);
     if (orientation === 'portrait') return { x: mirrorIf(isRtl, across), y: 1 - along };
-    return { x: mirrorIf(isRtl, along), y: across };
+    return { x: along, y: across };
   });
 }
 
@@ -155,7 +158,9 @@ export function placeDecor(points: readonly Point[], orientation: RoadOrientatio
   const road = sampleRoad(points);
   const nextRandom = createRandom(points.length * 7919 + (orientation === 'portrait' ? 1 : 2));
   const items: DecorItem[] = [];
-  const wanted = DECOR_COUNT[orientation];
+  const wanted = Math.round(
+    DECOR_COUNT[orientation] * Math.max(1, points.length / DECOR_BASE_STOPS),
+  );
   for (let attempt = 0; attempt < wanted * 30 && items.length < wanted; attempt++) {
     const candidate = { x: 0.04 + nextRandom() * 0.92, y: 0.04 + nextRandom() * 0.92 };
     const kind = DECOR_KINDS[Math.floor(nextRandom() * DECOR_KINDS.length)] as DecorKind;

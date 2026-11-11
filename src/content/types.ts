@@ -1,5 +1,18 @@
 export type LanguageCode = 'he' | 'en';
-export type GameId = 'numbers' | 'letters' | 'trace' | 'colors' | 'words' | 'sky';
+export type GameId =
+  | 'numbers'
+  | 'colors'
+  | 'shapes'
+  | 'lookalike'
+  | 'letters'
+  | 'count'
+  | 'trace'
+  | 'mix'
+  | 'words'
+  | 'starts'
+  | 'add'
+  | 'sky'
+  | 'niqqud';
 export type TextDirection = 'rtl' | 'ltr';
 
 /**
@@ -60,6 +73,36 @@ export interface ColorEntry {
   example: { emoji: string; phrase: string; speech: string };
 }
 
+export interface ShapeEntry {
+  /** Ascii id used in audio file names and to pick the drawing, e.g. 'circle'. */
+  id: string;
+  name: string;
+  nameSpeech: string;
+}
+
+/** A picture that looks like one of the shapes (a pizza is a triangle). */
+export interface LookalikeEntry {
+  /** Ascii id used in audio file names, e.g. 'pizza'. */
+  id: string;
+  emoji: string;
+  /** The id of the shape it looks like. */
+  shapeId: string;
+  name: string;
+  nameSpeech: string;
+}
+
+/** A vowel mark (Hebrew only), shown on a letter. */
+export interface NiqqudEntry {
+  id: string;
+  /** The letter with the mark, e.g. 'מָ'. */
+  sample: string;
+  name: string;
+  nameSpeech: string;
+  /** The sound it gives, e.g. 'אָ'. */
+  soundText: string;
+  soundSpeech: string;
+}
+
 export interface NumberNames {
   /** Index = number (index 0 unused). Spoken counting form. */
   spoken: readonly string[];
@@ -73,17 +116,34 @@ export interface AboutSection {
   body: string;
 }
 
+/** The line that tells the child what to do in a game, shown and spoken. */
+export interface PromptText {
+  placeholder: string;
+  placeholderSpeech: string;
+}
+
 export interface UiText {
   appName: string;
   aboutButton: string;
   credit: string;
   /** The friendly guide on the home road: its label and what it says when tapped. */
   guide: { label: string; speech: string };
+  /** Label of the button that scrolls the road back to the next game to play. */
+  nextGame: string;
   gameNames: Record<GameId, string>;
   /** How each game name is spoken (Hebrew: with niqqud). */
   gameNameSpeech: Record<GameId, string>;
-  numbers: { placeholder: string; placeholderSpeech: string };
-  colors: { placeholder: string; placeholderSpeech: string };
+  numbers: PromptText;
+  colors: PromptText;
+  shapes: PromptText;
+  lookalike: PromptText;
+  count: PromptText;
+  mix: PromptText;
+  starts: PromptText;
+  add: PromptText;
+  niqqud: PromptText;
+  /** Little words the games string together: "red PLUS yellow MAKES orange". */
+  phrases: { plus: string; equals: string; makes: string };
   letters: {
     placeholder: string;
     placeholderSpeech: string;
@@ -136,6 +196,12 @@ export interface LanguagePack {
   finalLetters: FinalLetterEntry[];
   words: WordEntry[];
   colors: ColorEntry[];
+  shapes: ShapeEntry[];
+  lookalikes: LookalikeEntry[];
+  /** Hebrew only; empty in other languages. */
+  niqqud: NiqqudEntry[];
+  /** The games this language offers on the road (niqqud is Hebrew only). */
+  availableGames: readonly GameId[];
   numbers: NumberNames;
   /** Largest number the app can say; used when counting achieved words. */
   maxCount: number;

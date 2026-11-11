@@ -63,6 +63,12 @@ describe.each(LANGUAGE_ORDER)('language pack "%s"', (code) => {
       pack.ui.trace.placeholder,
       pack.ui.trace.baseLegend,
       pack.ui.trace.next,
+      ...pack.shapes.map((shape) => shape.name),
+      ...pack.niqqud.map((entry) => entry.name),
+      ...(['shapes', 'lookalike', 'count', 'mix', 'starts', 'add', 'niqqud'] as const).map(
+        (game) => pack.ui[game].placeholder,
+      ),
+      ...Object.values(pack.ui.phrases),
       pack.ui.about.title,
       pack.ui.about.intro,
       ...pack.ui.about.sections.map((section) => section.body),
@@ -95,6 +101,27 @@ describe.each(LANGUAGE_ORDER)('language pack "%s"', (code) => {
     }
   });
 
+  it('has eight shapes with unique ids and names', () => {
+    expect(pack.shapes).toHaveLength(8);
+    expect(new Set(pack.shapes.map((shape) => shape.id)).size).toBe(8);
+    for (const shape of pack.shapes) {
+      expect(shape.name && shape.nameSpeech).toBeTruthy();
+    }
+  });
+
+  it('offers niqqud in Hebrew only, and lists exactly the games it can play', () => {
+    expect(pack.availableGames.includes('niqqud')).toBe(code === 'he');
+    expect(pack.niqqud.length > 0).toBe(code === 'he');
+    expect(pack.availableGames).toHaveLength(code === 'he' ? 13 : 12);
+    expect(new Set(pack.availableGames).size).toBe(pack.availableGames.length);
+  });
+
+  it('has an instruction line for every game it offers', () => {
+    for (const game of ['shapes', 'lookalike', 'count', 'mix', 'starts', 'add'] as const) {
+      expect(pack.ui[game].placeholder && pack.ui[game].placeholderSpeech).toBeTruthy();
+    }
+  });
+
   it('lists every recording exactly once', () => {
     const ids = listRecordingItems(pack).map((item) => item.clipId);
     expect(new Set(ids).size).toBe(ids.length);
@@ -103,6 +130,23 @@ describe.each(LANGUAGE_ORDER)('language pack "%s"', (code) => {
 
 describe('Hebrew specifics', () => {
   const hebrew = packs.he;
+
+  it('has the nine niqqud marks, each with a name and a sound', () => {
+    expect(hebrew.niqqud.map((entry) => entry.id)).toEqual([
+      'kamatz',
+      'patach',
+      'tzere',
+      'segol',
+      'hiriq',
+      'holam',
+      'shuruk',
+      'kubutz',
+      'shva',
+    ]);
+    for (const entry of hebrew.niqqud) {
+      expect(entry.sample && entry.name && entry.soundText).toBeTruthy();
+    }
+  });
 
   it('fills a final-form slot with its base letter', () => {
     const water = hebrew.words.find((word) => word.id === 'mayim');

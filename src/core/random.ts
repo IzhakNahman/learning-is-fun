@@ -26,3 +26,12 @@ export function shuffled<T>(items: readonly T[], random: RandomSource = Math.ran
   }
   return copy;
 }
+
+/** Up to `count` different items from `items`, in random order. */
+export function pickDistinct<T>(
+  items: readonly T[],
+  count: number,
+  random: RandomSource = Math.random,
+): T[] {
+  return shuffled(items, random).slice(0, count);
+}

@@ -295,6 +295,7 @@ button {
   gap: 1.2vmin;
   width: 100%;
   max-width: min(46vmin, 44cqh);
+  direction: ltr;
 }
 
 .ball {
@@ -346,8 +347,13 @@ button {
   grid-template-columns: repeat(6, 1fr);
 }
 
-#cgrid {
+#cgrid,
+#shgrid {
   grid-template-columns: repeat(2, 1fr);
+}
+
+#qgrid {
+  grid-template-columns: repeat(3, 1fr);
 }
 
 #ngrid {
@@ -820,7 +826,8 @@ button {
     grid-template-columns: repeat(4, 1fr);
   }
 
-  #cgrid {
+  #cgrid,
+  #shgrid {
     grid-template-columns: repeat(4, 1fr);
   }
 }
@@ -1079,14 +1086,25 @@ button,
   opacity: 0.85;
   text-align: center;
 }
-.road-scroll {
+.road-wrap {
+  position: relative;
   flex: 1;
   min-height: 0;
+}
+.road-scroll {
+  height: 100%;
   overflow: auto;
+  /* the road is a picture, not text: it always starts at the left or the bottom */
+  direction: ltr;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.7) transparent;
+  outline: none;
 }
 .road-scene {
+  /* One size for every game button, shared by the buttons and the room the road gives them. */
+  --stop-size: clamp(92px, 27vmin, 170px);
   position: relative;
   margin-inline: auto;
 }
@@ -1095,14 +1113,17 @@ button,
   width: 100%;
   max-width: 640px;
   height: 100%;
-  min-height: 560px;
+  min-height: max(560px, calc(var(--stops, 6) * var(--stop-size) * 1.1));
 }
 .road-scene.landscape {
   height: 100%;
-  /* fills the screen; only a very narrow landscape window scrolls sideways */
-  width: 100%;
-  min-width: 600px;
+  /* each stop gets its own room, so a longer road simply scrolls sideways */
+  width: max(100%, calc(var(--stops, 6) * var(--stop-size) * 0.75));
   margin-inline: 0;
+}
+.road-wrap:has(.landscape) .road-scroll {
+  /* a sideways road only scrolls sideways */
+  overflow-y: hidden;
 }
 .road-svg {
   position: absolute;
@@ -1149,16 +1170,15 @@ button,
 .decor.letter {
   font-size: clamp(44px, 12vmin, 120px);
   font-weight: 900;
-  color: rgba(255, 255, 255, 0.55);
-  text-shadow: 0 0.6vmin 0 rgba(0, 0, 0, 0.05);
+  color: rgba(255, 255, 255, 0.32);
   rotate: -8deg;
 }
 .decor.letter:nth-of-type(even) {
   rotate: 7deg;
-  color: rgba(255, 244, 168, 0.65);
+  color: rgba(255, 255, 255, 0.32);
 }
 .decor.letter:nth-of-type(3n) {
-  color: rgba(255, 190, 215, 0.6);
+  color: rgba(255, 255, 255, 0.32);
 }
 .marker {
   position: absolute;
@@ -1168,13 +1188,23 @@ button,
   filter: drop-shadow(0 0.5vmin 0 rgba(0, 0, 0, 0.18));
   pointer-events: none;
 }
-.stop-star {
+.stop-check {
   position: absolute;
-  bottom: -1.4vmin;
-  inset-inline-start: -1.6vmin;
-  font-size: clamp(20px, 5vmin, 38px);
+  /* top corner away from the speaker, so the owl at the bottom never covers it */
+  top: -1.2vmin;
+  inset-inline-start: -1.4vmin;
+  display: grid;
+  place-items: center;
+  width: clamp(24px, 6vmin, 44px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #2fb344;
+  border: 0.5vmin solid #fff;
+  color: #fff;
+  font-size: clamp(14px, 3.6vmin, 26px);
+  font-weight: 900;
   line-height: 1;
-  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.3));
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
 }
 /* the owl guide stands beside the next game to play */
 .guide {
@@ -1209,8 +1239,7 @@ button,
   }
 }
 .stop {
-  /* One size for every game button; capped so it stays reasonable on a big PC window. */
-  --stop-width: clamp(92px, 27vmin, 170px);
+  --stop-width: var(--stop-size);
   --stop-icon: clamp(46px, 13vmin, 96px);
   --stop-font: clamp(13px, 3.6vmin, 25px);
   position: absolute;
@@ -1313,8 +1342,10 @@ button,
   .home-head {
     padding-top: calc(6px + var(--safe-top));
   }
+  .road-scene {
+    --stop-size: 25vh;
+  }
   .stop {
-    --stop-width: 25vh;
     --stop-icon: 15vh;
     --stop-font: 4.4vh;
   }
@@ -1334,7 +1365,8 @@ button,
 
 /* 12 colours: four columns in landscape so all fit without scrolling */
 @media (orientation: landscape) {
-  #cgrid {
+  #cgrid,
+  #shgrid {
     grid-template-columns: repeat(4, 1fr);
   }
 }
@@ -1597,5 +1629,495 @@ button,
   #wgrid,
   #lgrid {
     grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+/* shapes game */
+.shbig {
+  width: min(34vmin, 100%, 38cqh);
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: min(17vmin, 19cqh);
+  line-height: 1;
+}
+
+.shape-art {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0.8vmin 0 rgba(0, 0, 0, 0.12));
+}
+
+.shape-tile {
+  padding: 12%;
+}
+
+.shape-tile.sel {
+  outline: 1vmin solid #ffd43b;
+  outline-offset: 0.3vmin;
+}
+
+/* niqqud game */
+.niqqud-tile {
+  font-size: clamp(26px, 9vmin, 64px);
+}
+
+/* drag games (count, mix, starts, add) */
+.play {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.6vmin;
+  height: 100%;
+  padding: calc(58px + var(--safe-top)) 2vmin 2vmin;
+  color: #1b4fa0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.play-prompt {
+  font-size: clamp(18px, 4.6vmin, 36px);
+  font-weight: 900;
+  color: #a8326b;
+  text-align: center;
+}
+
+.play-stars {
+  display: flex;
+  gap: 1vmin;
+  font-size: clamp(16px, 4vmin, 30px);
+}
+
+.play-stars .star {
+  filter: grayscale(1);
+  opacity: 0.35;
+}
+
+.play-stars .star.on {
+  filter: none;
+  opacity: 1;
+  animation: pop 0.35s;
+}
+
+.play-choices {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 3vmin;
+}
+
+.draggable {
+  touch-action: none;
+  cursor: grab;
+  position: relative;
+}
+
+.draggable.dragging {
+  z-index: 60;
+  cursor: grabbing;
+  box-shadow: 0 2vmin 3vmin rgba(0, 0, 0, 0.28);
+  scale: 1.1;
+}
+
+.draggable.placed {
+  visibility: hidden;
+}
+
+.draggable.hint {
+  animation: hint-glow 0.9s ease-in-out infinite;
+}
+
+@keyframes hint-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 212, 59, 0);
+  }
+  50% {
+    box-shadow: 0 0 0 1.6vmin rgba(255, 212, 59, 0.95);
+  }
+}
+
+.tile.choice {
+  width: min(22vmin, 130px);
+  height: min(22vmin, 130px);
+  font-size: min(11vmin, 64px);
+  flex: none;
+}
+
+/* numbers always run left to right, in Hebrew too (letters and words stay right to left) */
+#countplay .count-box,
+#countplay .play-choices,
+.play-stars {
+  direction: ltr;
+}
+
+/* count */
+.count-box {
+  flex: 1;
+  min-height: 0;
+  width: min(100%, 900px);
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  gap: 1.4vmin 2vmin;
+  padding: 2vmin;
+  background: rgba(255, 255, 255, 0.8);
+  border: 0.8vmin dashed #8fb4e8;
+  border-radius: 4vmin;
+}
+
+.count-box.done {
+  border-style: solid;
+  border-color: #51cf66;
+  background: #eaffee;
+}
+
+.count-item {
+  border: 0;
+  background: none;
+  padding: 0;
+  font-size: min(20vmin, 16vh);
+  line-height: 1.1;
+  cursor: pointer;
+  opacity: 0.8;
+}
+
+.count-box.many .count-item {
+  font-size: min(13vmin, 11vh);
+}
+
+.count-item.on {
+  opacity: 1;
+  animation: pop 0.35s;
+}
+
+/* mix colours */
+.mix-board {
+  flex: 1;
+  min-height: 0;
+  width: min(100%, 900px);
+  display: flex;
+  align-items: stretch;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 4vmin;
+  padding: 2vmin;
+}
+
+.mix-side {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2vmin;
+  cursor: pointer;
+}
+
+.mix-line {
+  width: 1vmin;
+  min-width: 5px;
+  border-radius: 1vmin;
+  background: #b9cdea;
+  margin-inline: 1.5vmin;
+}
+
+.mix-swatch {
+  width: min(21vmin, 18vh, 140px, 15vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 0.8vmin solid rgba(0, 0, 0, 0.16);
+  box-shadow: 0 1vmin 0 rgba(0, 0, 0, 0.12);
+  flex: none;
+}
+
+.mix-swatch.choice {
+  width: min(20vmin, 16vh, 120px, 18vw);
+}
+
+.mix-plus {
+  font-size: min(9vmin, 56px);
+  font-weight: 900;
+}
+
+.mix-slot {
+  width: min(24vmin, 20vh, 150px, 21vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 0.9vmin dashed #8fb4e8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: min(12vmin, 72px);
+  font-weight: 900;
+  color: #8fb4e8;
+}
+
+.mix-slot.done {
+  border-style: solid;
+  border-color: rgba(0, 0, 0, 0.16);
+  animation: pop 0.4s;
+}
+
+/* find the shape */
+.lookalike-target {
+  width: min(26vmin, 160px);
+  height: min(26vmin, 160px);
+  padding: 2vmin;
+  flex: none;
+}
+
+.lookalike-target.right {
+  background: #8ce99a;
+}
+
+/* starts with */
+.starts-stage {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5vmin;
+}
+
+.starts-picture {
+  font-size: min(34vmin, 26vh);
+  line-height: 1;
+  padding: 2vmin 4vmin;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 4vmin;
+}
+
+.starts-word {
+  font-size: min(8vmin, 48px);
+  font-weight: 900;
+  min-height: 1.2em;
+}
+
+.starts-letter {
+  width: min(24vmin, 150px);
+  height: min(24vmin, 150px);
+  font-size: min(12vmin, 72px);
+  flex: none;
+}
+
+.starts-letter.right {
+  background: #8ce99a;
+}
+
+/* add it up */
+.add-board {
+  flex: 1;
+  min-height: 0;
+  width: min(100%, 900px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3vmin;
+}
+
+#addplay[data-level='easy'] {
+  --dot: clamp(12px, min(5.4vw, 5vh), 44px);
+}
+
+#addplay[data-level='hard'] {
+  --dot: clamp(9px, min(3.9vw, 3.8vh), 30px);
+}
+
+.add-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2vmin;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 3vmin;
+  padding: 1vmin 1.5vmin;
+  cursor: pointer;
+  direction: ltr;
+}
+
+.add-dots {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 5), var(--dot));
+  gap: calc(var(--dot) * 0.18);
+  justify-items: center;
+}
+
+.add-dot {
+  width: var(--dot);
+  height: var(--dot);
+  border-radius: 50%;
+}
+
+.add-dot.a {
+  background: #ff5d5d;
+}
+
+.add-dot.b {
+  background: #4d96ff;
+}
+
+.add-dot.c {
+  background: #fcc419;
+}
+
+.add-sign {
+  font-size: calc(var(--dot) * 1.8);
+  font-weight: 900;
+}
+
+.add-slot {
+  min-width: calc(var(--dot) * 5 + var(--dot) * 0.72 + 2vmin);
+  min-height: calc(var(--dot) * 2.4);
+  border: 0.7vmin dashed #8fb4e8;
+  border-radius: 2vmin;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(var(--dot) * 1.8);
+  font-weight: 900;
+  color: #8fb4e8;
+}
+
+.add-slot.done {
+  border-style: solid;
+  border-color: #51cf66;
+  background: #eaffee;
+  animation: pop 0.35s;
+}
+
+.add-answers {
+  direction: ltr;
+}
+
+.add-answer {
+  background: #fff;
+  border-radius: 2.4vmin;
+  padding: 1.4vmin 1.8vmin;
+  box-shadow: 0 0.8vmin 0 rgba(0, 0, 0, 0.15);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .draggable.hint,
+  .play-stars .star.on,
+  .count-item.on,
+  .mix-slot.done,
+  .add-slot.done {
+    animation: none;
+  }
+}
+
+/* the road keeps its own text direction inside the always-left-to-right scroller */
+:root[dir='rtl'] .stop {
+  direction: rtl;
+}
+
+/* soft fades where there is more road to scroll to */
+.road-wrap::before,
+.road-wrap::after {
+  content: '';
+  position: absolute;
+  z-index: 4;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.road-wrap:has(.landscape)::before,
+.road-wrap:has(.landscape)::after {
+  top: 0;
+  bottom: 0;
+  width: clamp(24px, 6vw, 70px);
+}
+.road-wrap:has(.landscape)::before {
+  left: 0;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.75), transparent);
+}
+.road-wrap:has(.landscape)::after {
+  right: 0;
+  background: linear-gradient(270deg, rgba(255, 255, 255, 0.75), transparent);
+}
+.road-wrap:has(.portrait)::before,
+.road-wrap:has(.portrait)::after {
+  left: 0;
+  right: 0;
+  height: clamp(18px, 4vh, 40px);
+}
+.road-wrap:has(.portrait)::before {
+  top: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.75), transparent);
+}
+.road-wrap:has(.portrait)::after {
+  bottom: 0;
+  background: linear-gradient(0deg, rgba(255, 255, 255, 0.75), transparent);
+}
+.road-wrap.more-before::before,
+.road-wrap.more-after::after {
+  opacity: 1;
+}
+
+/* the owl button that scrolls back to the next game */
+.road-jump {
+  position: absolute;
+  z-index: 5;
+  inset-inline-end: clamp(8px, 2vmin, 20px);
+  bottom: clamp(8px, 2vmin, 20px);
+  width: clamp(48px, 9vmin, 72px);
+  aspect-ratio: 1;
+  border: 0.5vmin solid #fff;
+  border-radius: 50%;
+  background: #ffd23f;
+  font-size: clamp(26px, 5.4vmin, 42px);
+  line-height: 1;
+  box-shadow: 0 0.8vmin 0 rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+  opacity: 0;
+  scale: 0.6;
+  pointer-events: none;
+  transition:
+    opacity 0.25s,
+    scale 0.25s;
+}
+.road-wrap.next-hidden .road-jump {
+  opacity: 1;
+  scale: 1;
+  pointer-events: auto;
+}
+
+/* arrow buttons for mouse users on a sideways road */
+.road-arrow {
+  display: none;
+  position: absolute;
+  z-index: 5;
+  top: 50%;
+  translate: 0 -50%;
+  width: clamp(44px, 6vmin, 64px);
+  aspect-ratio: 1;
+  border: 0.4vmin solid #fff;
+  border-radius: 50%;
+  background: rgba(30, 90, 190, 0.85);
+  color: #fff;
+  font-size: clamp(18px, 3vmin, 28px);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+.road-arrow.back {
+  left: 8px;
+}
+.road-arrow.forward {
+  right: 8px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .road-arrow {
+    display: block;
+  }
+  .road-wrap.more-before .road-arrow.back,
+  .road-wrap.more-after .road-arrow.forward {
+    opacity: 1;
+    pointer-events: auto;
   }
 }
