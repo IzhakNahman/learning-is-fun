@@ -188,6 +188,34 @@ describe('saving, deleting and undo', () => {
     expect(ffmpegFilters[1]).toContain('atrim=start=0.3');
   });
 
+  it('adds the clean-voice step only when asked', async () => {
+    await fetch(`${base}/api/clips/he/num-01?clean=1`, withToken({ method: 'PUT', body: 'a' }));
+    await fetch(`${base}/api/clips/he/num-02?clean=0`, withToken({ method: 'PUT', body: 'b' }));
+    expect(ffmpegFilters[0]).toContain('afftdn');
+    expect(ffmpegFilters[1]).not.toContain('afftdn');
+    const bad = await fetch(
+      `${base}/api/clips/he/num-03?clean=yes`,
+      withToken({ method: 'PUT', body: 'c' }),
+    );
+    expect(bad.status).toBe(400);
+  });
+
+  it('previews a conversion without saving anything', async () => {
+    const response = await fetch(
+      `${base}/api/preview?clean=1&cutEndMs=300`,
+      withToken({ method: 'POST', body: 'take' }),
+    );
+    expect(response.headers.get('content-type')).toBe('audio/mpeg');
+    expect(await response.text()).toBe('mp3:take');
+    expect(ffmpegFilters[0]).toContain('afftdn');
+    expect(await manifest()).toEqual([]);
+  });
+
+  it('refuses a preview without the token', async () => {
+    const response = await fetch(`${base}/api/preview`, { method: 'POST', body: 'take' });
+    expect(response.status).toBe(403);
+  });
+
   it('rejects a bad or too long end cut', async () => {
     for (const bad of ['abc', '-5', '0.3', '5000']) {
       const response = await fetch(

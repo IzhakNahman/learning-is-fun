@@ -57,31 +57,53 @@ const MIN_CLIP_SECONDS = 0.05;
 
 const TRIM_START = `silenceremove=start_periods=1:start_threshold=${SILENCE_THRESHOLD}:detection=peak`;
 
+const TRIM_BOTH_ENDS = [TRIM_START, 'areverse', TRIM_START, 'areverse'];
+const EVEN_VOLUME = 'loudnorm=I=-16:TP=-1.5:LRA=11';
+const PAD_BOTH_ENDS = [`adelay=${LEAD_IN_MS}`, `apad=pad_dur=${TAIL_SECONDS}`];
+
 /** Trim silence at both ends (trim, reverse, trim, reverse), even out the volume, add a short pad. */
-export const AUDIO_FILTER = [
-  TRIM_START,
-  'areverse',
-  TRIM_START,
-  'areverse',
-  'loudnorm=I=-16:TP=-1.5:LRA=11',
-  `adelay=${LEAD_IN_MS}`,
-  `apad=pad_dur=${TAIL_SECONDS}`,
-].join(',');
+export const AUDIO_FILTER = [...TRIM_BOTH_ENDS, EVEN_VOLUME, ...PAD_BOTH_ENDS].join(',');
+
+/** Before trimming: drop low rumble (desk bumps, traffic) and steady background noise (fan, hum). */
+export const VOICE_CLEAN_BEFORE = [
+  'highpass=f=80',
+  // tn=1 learns the noise from the recording itself.
+  'afftdn=nf=-25:tn=1',
+];
+/**
+ * After trimming: soften sharp "s/sh" sounds. (No compressor: in tests it raised the background
+ * noise back up, and the volume is evened out at the end anyway.)
+ */
+export const VOICE_CLEAN_AFTER = ['deesser=i=0.4'];
 
 /** Longest end cut allowed, so a mistake can never throw the whole word away. */
 export const MAX_CUT_END_MS = 1000;
 
-/**
- * Drops the last `cutEndSeconds` of the recording first (the click of the key or mouse that
- * stopped it), then runs the normal clean-up.
- */
-export function audioFilter(cutEndSeconds = 0): string {
-  if (cutEndSeconds <= 0) return AUDIO_FILTER;
-  const cutEnd = `areverse,atrim=start=${cutEndSeconds},asetpts=N/SR/TB,areverse`;
-  return `${cutEnd},${AUDIO_FILTER}`;
+export interface ConvertOptions {
+  /** Drop this much from the end first (the click of the key or mouse that stopped it). */
+  cutEndSeconds?: number;
+  /** Add rumble cut, noise removal and de-essing to the normal clean-up. */
+  cleanVoice?: boolean;
 }
 
-export function ffmpegArgs(inputPath: string, outputPath: string, cutEndSeconds = 0): string[] {
+export function audioFilter(options: ConvertOptions = {}): string {
+  const { cutEndSeconds = 0, cleanVoice = false } = options;
+  const cutEnd =
+    cutEndSeconds > 0
+      ? ['areverse', `atrim=start=${cutEndSeconds}`, 'asetpts=N/SR/TB', 'areverse']
+      : [];
+  const before = cleanVoice ? VOICE_CLEAN_BEFORE : [];
+  const after = cleanVoice ? VOICE_CLEAN_AFTER : [];
+  return [...cutEnd, ...before, ...TRIM_BOTH_ENDS, ...after, EVEN_VOLUME, ...PAD_BOTH_ENDS].join(
+    ',',
+  );
+}
+
+export function ffmpegArgs(
+  inputPath: string,
+  outputPath: string,
+  options: ConvertOptions = {},
+): string[] {
   return [
     '-hide_banner',
     '-loglevel',
@@ -91,7 +113,7 @@ export function ffmpegArgs(inputPath: string, outputPath: string, cutEndSeconds 
     inputPath,
     '-vn',
     '-af',
-    audioFilter(cutEndSeconds),
+    audioFilter(options),
     '-ac',
     '1',
     '-ar',
@@ -132,10 +154,10 @@ export async function convertToClip(
   tools: AudioTools,
   inputPath: string,
   outputPath: string,
-  cutEndSeconds = 0,
+  options: ConvertOptions = {},
 ): Promise<void> {
   try {
-    await tools.run(tools.ffmpeg, ffmpegArgs(inputPath, outputPath, cutEndSeconds));
+    await tools.run(tools.ffmpeg, ffmpegArgs(inputPath, outputPath, options));
   } catch (error) {
     const details = error instanceof Error && 'stderr' in error ? String(error.stderr) : '';
     throw new Error(`ffmpeg could not read this audio. ${details}`.trim());

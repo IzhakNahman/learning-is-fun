@@ -249,6 +249,9 @@
       <span class="progress" id="progress"></span>
       <input type="search" id="search" placeholder="Search id or text" />
       <label><input type="checkbox" id="missing-only" /> Missing only</label>
+      <label title="Cut rumble, remove background noise and soften sharp s sounds"
+        ><input type="checkbox" id="clean-voice" checked /> ✨ Clean voice</label
+      >
       <span class="spacer"></span>
       <button id="next-missing" class="primary">Next missing clip</button>
       <button id="publish">Publish…</button>
@@ -267,6 +270,9 @@
         <button id="rec-record" title="Space">● Record</button>
         <div class="meter" id="rec-meter"><div></div></div>
         <button id="rec-play" title="Play what you just recorded">▶ Play take</button>
+        <button id="rec-preview" title="Hear the take the way it will be saved">
+          ✨ Play cleaned
+        </button>
         <button id="rec-keep" class="primary" title="Enter">✓ Keep</button>
         <button id="rec-retry">↺ Retry</button>
         <button id="rec-voice">🔊 Device voice</button>

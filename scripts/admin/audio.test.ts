@@ -35,16 +35,40 @@ describe('ffmpegArgs', () => {
 });
 
 describe('audioFilter', () => {
-  it('is the normal clean-up when nothing is cut', () => {
+  it('is the normal clean-up when nothing extra is asked', () => {
     expect(audioFilter()).toBe(AUDIO_FILTER);
-    expect(audioFilter(0)).toBe(AUDIO_FILTER);
+    expect(audioFilter({ cutEndSeconds: 0, cleanVoice: false })).toBe(AUDIO_FILTER);
   });
 
   it('cuts the end first (the stop click), then cleans up', () => {
-    const filter = audioFilter(0.3);
+    const filter = audioFilter({ cutEndSeconds: 0.3 });
     expect(filter.startsWith('areverse,atrim=start=0.3,')).toBe(true);
     expect(filter.endsWith(AUDIO_FILTER)).toBe(true);
-    expect(ffmpegArgs('in', 'out', 0.3)).toContain(filter);
+    expect(ffmpegArgs('in', 'out', { cutEndSeconds: 0.3 })).toContain(filter);
+  });
+
+  it('removes rumble and noise before trimming, and softens "s" after', () => {
+    const steps = audioFilter({ cleanVoice: true }).split(',');
+    const noise = steps.findIndex((step) => step.startsWith('afftdn'));
+    const trim = steps.findIndex((step) => step.startsWith('silenceremove'));
+    const deesser = steps.findIndex((step) => step.startsWith('deesser'));
+    const volume = steps.findIndex((step) => step.startsWith('loudnorm'));
+    expect(steps[0]).toBe('highpass=f=80');
+    expect(noise).toBeLessThan(trim);
+    expect(trim).toBeLessThan(deesser);
+    expect(deesser).toBeLessThan(volume);
+    expect(steps.some((step) => step.startsWith('acompressor'))).toBe(false);
+  });
+
+  it('cuts the click before anything else', () => {
+    const steps = audioFilter({ cutEndSeconds: 0.3, cleanVoice: true }).split(',');
+    expect(steps.slice(0, 4)).toEqual([
+      'areverse',
+      'atrim=start=0.3',
+      'asetpts=N/SR/TB',
+      'areverse',
+    ]);
+    expect(steps[4]).toBe('highpass=f=80');
   });
 });
 

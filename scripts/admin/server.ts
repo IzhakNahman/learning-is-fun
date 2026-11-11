@@ -1,6 +1,6 @@
 import { timingSafeEqual } from 'node:crypto';
 import { existsSync } from 'node:fs';
-import { copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import http from 'node:http';
 import type { AddressInfo } from 'node:net';
 import os from 'node:os';
@@ -9,7 +9,13 @@ import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import { packs, type LanguageCode } from '../../src/content';
 import type { ClipListResponse, ClipRow } from './api';
-import { FFMPEG_INSTALL_HELP, MAX_CUT_END_MS, convertToClip, type AudioTools } from './audio';
+import {
+  FFMPEG_INSTALL_HELP,
+  MAX_CUT_END_MS,
+  convertToClip,
+  type AudioTools,
+  type ConvertOptions,
+} from './audio';
 import { backupClip, listBackedUpClipIds, restoreLatestBackup } from './backup';
 import { clipFilePath, languageAudioDir, listClips, parseLanguage } from './clips';
 import { listRecordedClipIds, syncManifest } from './manifest';
@@ -128,31 +134,42 @@ async function clipList(options: AdminOptions, language: LanguageCode): Promise<
   };
 }
 
-/** Converts the uploaded audio in a temp folder, backs up the old clip, then puts the new one in. */
+/** Converts uploaded audio in a temp folder and returns the mp3. Nothing is saved. */
+async function convertUpload(
+  options: AdminOptions,
+  audio: Buffer,
+  convert: ConvertOptions,
+): Promise<Buffer> {
+  if (!options.tools) throw new HttpError(503, FFMPEG_INSTALL_HELP);
+  if (audio.length === 0) throw new HttpError(400, 'The upload was empty');
+  const tools = options.tools;
+  const workDir = await mkdtemp(path.join(os.tmpdir(), 'audio-admin-'));
+  try {
+    const input = path.join(workDir, 'input');
+    const output = path.join(workDir, 'output.mp3');
+    await writeFile(input, audio);
+    await convertToClip(tools, input, output, convert).catch((error: unknown) => {
+      throw new HttpError(422, error instanceof Error ? error.message : String(error));
+    });
+    return await readFile(output);
+  } finally {
+    await rm(workDir, { recursive: true, force: true });
+  }
+}
+
+/** Converts the upload, backs up the old clip, then puts the new one in. */
 async function saveClip(
   options: AdminOptions,
   language: LanguageCode,
   clipId: string,
   target: string,
   audio: Buffer,
-  cutEndMs: number,
+  convert: ConvertOptions,
 ): Promise<void> {
-  if (!options.tools) throw new HttpError(503, FFMPEG_INSTALL_HELP);
-  if (audio.length === 0) throw new HttpError(400, 'The upload was empty');
-  const workDir = await mkdtemp(path.join(os.tmpdir(), 'audio-admin-'));
-  try {
-    const input = path.join(workDir, 'input');
-    const output = path.join(workDir, 'output.mp3');
-    await writeFile(input, audio);
-    await convertToClip(options.tools, input, output, cutEndMs / 1000).catch((error: unknown) => {
-      throw new HttpError(422, error instanceof Error ? error.message : String(error));
-    });
-    await backupClip(options.repoRoot, language, clipId);
-    await mkdir(languageAudioDir(options.repoRoot, language), { recursive: true });
-    await copyFile(output, target);
-  } finally {
-    await rm(workDir, { recursive: true, force: true });
-  }
+  const mp3 = await convertUpload(options, audio, convert);
+  await backupClip(options.repoRoot, language, clipId);
+  await mkdir(languageAudioDir(options.repoRoot, language), { recursive: true });
+  await writeFile(target, mp3);
   await syncManifest(options.repoRoot, language);
 }
 
@@ -206,6 +223,18 @@ function parseCutEndMs(value: string | null): number {
     throw new HttpError(400, `cutEndMs must be at most ${MAX_CUT_END_MS}`);
   }
   return cutEndMs;
+}
+
+/** `cutEndMs` (whole milliseconds) and `clean` (1 or 0) from the query string. */
+function parseConvertOptions(params: URLSearchParams): ConvertOptions {
+  const clean = params.get('clean');
+  if (clean !== null && clean !== '0' && clean !== '1') {
+    throw new HttpError(400, 'clean must be 1 or 0');
+  }
+  return {
+    cutEndSeconds: parseCutEndMs(params.get('cutEndMs')) / 1000,
+    cleanVoice: clean === '1',
+  };
 }
 
 function isConfirmed(body: string): boolean {
@@ -288,10 +317,10 @@ async function route(
     const clip = parseClipRoute(options, clipMatch[1], clipMatch[2]);
     const isUndo = clipMatch[3] !== undefined;
     if (method === 'PUT' && !isUndo) {
-      const cutEndMs = parseCutEndMs(url.searchParams.get('cutEndMs'));
+      const convert = parseConvertOptions(url.searchParams);
       const audio = await readBody(req, MAX_UPLOAD_BYTES);
       await inQueue(() =>
-        saveClip(options, clip.language, clip.clipId, clip.target, audio, cutEndMs),
+        saveClip(options, clip.language, clip.clipId, clip.target, audio, convert),
       );
       sendJson(res, 200, { ok: true });
       return;
@@ -307,6 +336,13 @@ async function route(
       return;
     }
     throw new HttpError(405, 'Method not allowed');
+  }
+
+  if (method === 'POST' && url.pathname === '/api/preview') {
+    const convert = parseConvertOptions(url.searchParams);
+    const audio = await readBody(req, MAX_UPLOAD_BYTES);
+    sendText(res, 'audio/mpeg', await convertUpload(options, audio, convert));
+    return;
   }
 
   if (method === 'GET' && url.pathname === '/api/publish') {

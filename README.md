@@ -47,6 +47,8 @@ A local page at http://localhost:5180 for recording and replacing clips. It need
   are cut off, so the key or mouse click is not in the clip.
 - **Upload**: drag an m4a, wav or mp3 file onto a row.
 - Every clip is converted to mono mp3: silence trimmed at both ends, volume evened out.
+- **✨ Clean voice** (on by default) also cuts low rumble, removes steady background noise (fan, hum)
+  and softens sharp "s/sh" sounds. **✨ Play cleaned** lets you hear a take exactly as it will be saved.
 - Replaced and deleted clips are copied to `.audio-backup/<lang>/` (ignored by git). **Undo** swaps the last backup back.
 - `public/audio/<lang>/manifest.json` is rewritten from the files that exist after every change.
 - **Publish** shows the changes, and after you confirm runs `git add`, `git commit` and `git push` for `public/audio` only.

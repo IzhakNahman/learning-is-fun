@@ -54,15 +54,55 @@ async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
 const clipUrl = (language: Language, clipId: string): string =>
   `/api/clips/${language}/${encodeURIComponent(clipId)}`;
 
-/** `cutEndMs` drops the end of a recording on the server (the click that stopped it). */
+/** `cutEndMs` drops the end of a recording (the click that stopped it); `clean` adds clean voice. */
+function convertQuery(cutEndMs: number): string {
+  const params = new URLSearchParams({ clean: state.cleanVoice ? '1' : '0' });
+  if (cutEndMs > 0) params.set('cutEndMs', String(cutEndMs));
+  return `?${params.toString()}`;
+}
+
 function uploadClip(
   language: Language,
   clipId: string,
   audio: Blob,
   cutEndMs = 0,
 ): Promise<unknown> {
-  const query = cutEndMs > 0 ? `?cutEndMs=${cutEndMs}` : '';
-  return api(`${clipUrl(language, clipId)}${query}`, { method: 'PUT', body: audio });
+  return api(`${clipUrl(language, clipId)}${convertQuery(cutEndMs)}`, {
+    method: 'PUT',
+    body: audio,
+  });
+}
+
+/** The take converted exactly as it would be saved, without saving it. */
+async function previewClip(audio: Blob, cutEndMs: number): Promise<Blob> {
+  const response = await fetch(`/api/preview${convertQuery(cutEndMs)}`, {
+    method: 'POST',
+    headers: { 'X-Admin-Token': TOKEN },
+    body: audio,
+  });
+  if (response.ok) return response.blob();
+  const body: unknown = await response.json().catch(() => ({}));
+  const message =
+    typeof body === 'object' && body !== null && 'error' in body ? String(body.error) : '';
+  throw new Error(message || `Server said ${response.status}`);
+}
+
+const CLEAN_VOICE_KEY = 'audio-admin:clean-voice';
+
+function loadCleanVoice(): boolean {
+  try {
+    return localStorage.getItem(CLEAN_VOICE_KEY) !== '0';
+  } catch {
+    return true;
+  }
+}
+
+function saveCleanVoice(on: boolean): void {
+  try {
+    localStorage.setItem(CLEAN_VOICE_KEY, on ? '1' : '0');
+  } catch {
+    // Only a convenience: the box simply starts ticked next time.
+  }
 }
 
 // ---------- page state ----------
@@ -73,6 +113,7 @@ const state = {
   search: '',
   missingOnly: false,
   busyClipIds: new Set<string>(),
+  cleanVoice: loadCleanVoice(),
 };
 
 const listElement = byId<HTMLElement>('list');
@@ -294,6 +335,7 @@ const recorder = (() => {
   const messageElement = byId<HTMLElement>('rec-message');
   const recordButton = byId<HTMLButtonElement>('rec-record');
   const playButton = byId<HTMLButtonElement>('rec-play');
+  const previewButton = byId<HTMLButtonElement>('rec-preview');
   const keepButton = byId<HTMLButtonElement>('rec-keep');
   const retryButton = byId<HTMLButtonElement>('rec-retry');
   const prevButton = byId<HTMLButtonElement>('rec-prev');
@@ -347,6 +389,7 @@ const recorder = (() => {
     recordButton.classList.toggle('waiting', phase === 'waiting');
     recordButton.disabled = !clip || phase === 'saving' || !state.data?.ffmpegReady;
     playButton.disabled = phase !== 'review';
+    previewButton.disabled = phase !== 'review';
     keepButton.disabled = phase !== 'review';
     retryButton.disabled = phase !== 'review';
     const busy = phase === 'waiting' || phase === 'recording' || phase === 'saving';
@@ -474,6 +517,27 @@ const recorder = (() => {
     refresh();
   }
 
+  /** Plays the take after the server cleaned it the way Keep would. */
+  async function playCleaned(): Promise<void> {
+    if (phase !== 'review' || !take) return;
+    const playing = take;
+    setMessage('Cleaning…');
+    try {
+      const cleaned = await previewClip(playing, STOP_CLICK_CUT_MS);
+      if (take !== playing) return;
+      const url = URL.createObjectURL(cleaned);
+      playUrl(url);
+      currentAudio?.addEventListener('ended', () => URL.revokeObjectURL(url));
+      setMessage(
+        state.cleanVoice
+          ? 'This is how it will be saved (clean voice on). ✓ Keep or ↺ Retry.'
+          : 'This is how it will be saved (clean voice off). ✓ Keep or ↺ Retry.',
+      );
+    } catch (error) {
+      setMessage(`Could not clean: ${errorText(error)}`, true);
+    }
+  }
+
   function retryTake(): void {
     if (phase !== 'review') return;
     clearTake();
@@ -541,6 +605,7 @@ const recorder = (() => {
 
   recordButton.addEventListener('click', toggleRecording);
   playButton.addEventListener('click', () => takeUrl && playUrl(takeUrl));
+  previewButton.addEventListener('click', () => void playCleaned());
   keepButton.addEventListener('click', () => void keepTake());
   retryButton.addEventListener('click', retryTake);
   prevButton.addEventListener('click', () => move(-1));
@@ -630,6 +695,12 @@ byId('tab-en').addEventListener('click', () => selectLanguage('en'));
 searchInput.addEventListener('input', () => {
   state.search = searchInput.value;
   renderList();
+});
+const cleanVoiceInput = byId<HTMLInputElement>('clean-voice');
+cleanVoiceInput.checked = state.cleanVoice;
+cleanVoiceInput.addEventListener('change', () => {
+  state.cleanVoice = cleanVoiceInput.checked;
+  saveCleanVoice(state.cleanVoice);
 });
 missingOnlyInput.addEventListener('change', () => {
   state.missingOnly = missingOnlyInput.checked;
