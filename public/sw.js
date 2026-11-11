@@ -1,7 +1,7 @@
 // Offline support: the app shell is cached on first visit; recorded audio is cached as it is used.
 // Audio (and its manifest.json) is fetched fresh when online, so new recordings show up;
 // the cached copy is only used offline.
-const CACHE_NAME = 'learning-is-fun-v6';
+const CACHE_NAME = 'learning-is-fun-v7';
 const APP_SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png'];
 
 self.addEventListener('install', (event) => {
