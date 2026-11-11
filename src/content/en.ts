@@ -430,11 +430,6 @@ const ui: UiText = {
         game: 'sky',
         body: 'A practice game in a 3D sky world. With the left hand the child moves the character (an on-screen joystick, or W A S D on a keyboard), and with the right hand punches a box (an on-screen button, or K). The child looks for the box with the right letter to complete a word. Every box breaks after 3 punches and three dots on the box show how many punches are left. After every letter the game pauses and says the letter name and its sound, and after every word it shows the picture and says the word. The timer stops while the child listens, and mistakes are never punished: a wrong letter still breaks and is explained. At the end the child counts the words they collected.',
       },
-      {
-        icon: '◌ָ',
-        game: 'niqqud',
-        body: 'Hebrew only.',
-      },
     ],
     skills:
       'The game practises letter and sound recognition, attention, counting, coordination between both hands, and making quick choices.',

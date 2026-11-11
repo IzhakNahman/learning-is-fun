@@ -148,6 +148,12 @@ describe('Hebrew specifics', () => {
     }
   });
 
+  it('shows every niqqud mark on the letter א', () => {
+    for (const entry of hebrew.niqqud) {
+      expect(entry.sample.startsWith('א'), entry.id).toBe(true);
+    }
+  });
+
   it('fills a final-form slot with its base letter', () => {
     const water = hebrew.words.find((word) => word.id === 'mayim');
     const lastSlot = water?.slots.at(-1);

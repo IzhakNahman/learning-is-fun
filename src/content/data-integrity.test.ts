@@ -26,8 +26,8 @@ describe.each(LANGUAGE_ORDER)('%s recording list and data integrity', (code) => 
     for (const name of Object.values(pack.ui.gameNames)) expect(name).toBeTruthy();
   });
 
-  it('has an About section for every game', () => {
-    const games = Object.keys(pack.ui.gameNames).sort();
+  it('has an About section for every game it offers, and none for games it does not', () => {
+    const games = [...pack.availableGames].sort();
     expect(pack.ui.about.sections.map((section) => section.game).sort()).toEqual(games);
   });
 });

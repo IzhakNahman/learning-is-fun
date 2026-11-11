@@ -94,7 +94,7 @@ export interface LookalikeEntry {
 /** A vowel mark (Hebrew only), shown on a letter. */
 export interface NiqqudEntry {
   id: string;
-  /** The letter with the mark, e.g. 'מָ'. */
+  /** The letter with the mark, e.g. 'אָ'. */
   sample: string;
   name: string;
   nameSpeech: string;

@@ -233,21 +233,21 @@ function shape(id: string, name: string): ShapeEntry {
   return { id, name, nameSpeech: name };
 }
 
-/** The vowel marks, each shown on the letter מ and sounded like the same vowel after א. */
+/** The vowel marks, each shown on the letter א and sounded the same way. */
 function niqqud(id: string, sample: string, name: string, soundText: string): NiqqudEntry {
   return { id, sample, name, nameSpeech: name, soundText, soundSpeech: soundText };
 }
 
 const niqqudMarks: NiqqudEntry[] = [
-  niqqud('kamatz', 'מָ', 'קָמָץ', 'אָ'),
-  niqqud('patach', 'מַ', 'פַּתַח', 'אַ'),
-  niqqud('tzere', 'מֵ', 'צֵרֵי', 'אֵ'),
-  niqqud('segol', 'מֶ', 'סֶגּוֹל', 'אֶ'),
-  niqqud('hiriq', 'מִ', 'חִירִיק', 'אִ'),
-  niqqud('holam', 'מֹ', 'חוֹלָם', 'אוֹ'),
-  niqqud('shuruk', 'מוּ', 'שׁוּרוּק', 'אוּ'),
-  niqqud('kubutz', 'מֻ', 'קֻבּוּץ', 'אֻ'),
-  niqqud('shva', 'מְ', 'שְׁוָא', 'אֶ'),
+  niqqud('kamatz', 'אָ', 'קָמָץ', 'אָ'),
+  niqqud('patach', 'אַ', 'פַּתַח', 'אַ'),
+  niqqud('tzere', 'אֵ', 'צֵרֵי', 'אֵ'),
+  niqqud('segol', 'אֶ', 'סֶגּוֹל', 'אֶ'),
+  niqqud('hiriq', 'אִ', 'חִירִיק', 'אִ'),
+  niqqud('holam', 'אֹ', 'חוֹלָם', 'אוֹ'),
+  niqqud('shuruk', 'אוּ', 'שׁוּרוּק', 'אוּ'),
+  niqqud('kubutz', 'אֻ', 'קֻבּוּץ', 'אֻ'),
+  niqqud('shva', 'אְ', 'שְׁוָא', 'אֶ'),
 ];
 
 function lookalike(id: string, emoji: string, shapeId: string, name: string): LookalikeEntry {
