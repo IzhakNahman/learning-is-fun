@@ -1,6 +1,13 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
-import { AUDIO_FILTER, convertToClip, ffmpegArgs, findTool, type RunCommand } from './audio';
+import {
+  AUDIO_FILTER,
+  audioFilter,
+  convertToClip,
+  ffmpegArgs,
+  findTool,
+  type RunCommand,
+} from './audio';
 
 function fakeRun(handler: (program: string, args: readonly string[]) => string): {
   run: RunCommand;
@@ -24,6 +31,20 @@ describe('ffmpegArgs', () => {
     expect(AUDIO_FILTER).toContain('silenceremove');
     expect(AUDIO_FILTER).toContain('areverse');
     expect(AUDIO_FILTER).toContain('loudnorm');
+  });
+});
+
+describe('audioFilter', () => {
+  it('is the normal clean-up when nothing is cut', () => {
+    expect(audioFilter()).toBe(AUDIO_FILTER);
+    expect(audioFilter(0)).toBe(AUDIO_FILTER);
+  });
+
+  it('cuts the end first (the stop click), then cleans up', () => {
+    const filter = audioFilter(0.3);
+    expect(filter.startsWith('areverse,atrim=start=0.3,')).toBe(true);
+    expect(filter.endsWith(AUDIO_FILTER)).toBe(true);
+    expect(ffmpegArgs('in', 'out', 0.3)).toContain(filter);
   });
 });
 

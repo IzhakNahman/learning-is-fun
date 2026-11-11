@@ -9,7 +9,7 @@ import { fileURLToPath } from 'node:url';
 import ts from 'typescript';
 import { packs, type LanguageCode } from '../../src/content';
 import type { ClipListResponse, ClipRow } from './api';
-import { FFMPEG_INSTALL_HELP, convertToClip, type AudioTools } from './audio';
+import { FFMPEG_INSTALL_HELP, MAX_CUT_END_MS, convertToClip, type AudioTools } from './audio';
 import { backupClip, listBackedUpClipIds, restoreLatestBackup } from './backup';
 import { clipFilePath, languageAudioDir, listClips, parseLanguage } from './clips';
 import { listRecordedClipIds, syncManifest } from './manifest';
@@ -135,6 +135,7 @@ async function saveClip(
   clipId: string,
   target: string,
   audio: Buffer,
+  cutEndMs: number,
 ): Promise<void> {
   if (!options.tools) throw new HttpError(503, FFMPEG_INSTALL_HELP);
   if (audio.length === 0) throw new HttpError(400, 'The upload was empty');
@@ -143,7 +144,7 @@ async function saveClip(
     const input = path.join(workDir, 'input');
     const output = path.join(workDir, 'output.mp3');
     await writeFile(input, audio);
-    await convertToClip(options.tools, input, output).catch((error: unknown) => {
+    await convertToClip(options.tools, input, output, cutEndMs / 1000).catch((error: unknown) => {
       throw new HttpError(422, error instanceof Error ? error.message : String(error));
     });
     await backupClip(options.repoRoot, language, clipId);
@@ -194,6 +195,17 @@ async function pageScript(): Promise<string> {
 async function pageHtml(token: string): Promise<string> {
   const html = await readFile(path.join(PAGE_DIR, 'index.html'), 'utf8');
   return html.replace('__ADMIN_TOKEN__', token);
+}
+
+/** How much to cut off the end of a recording (the stop click). Missing means nothing. */
+function parseCutEndMs(value: string | null): number {
+  if (value === null) return 0;
+  if (!/^\d{1,4}$/.test(value)) throw new HttpError(400, 'cutEndMs must be a whole number');
+  const cutEndMs = Number(value);
+  if (cutEndMs > MAX_CUT_END_MS) {
+    throw new HttpError(400, `cutEndMs must be at most ${MAX_CUT_END_MS}`);
+  }
+  return cutEndMs;
 }
 
 function isConfirmed(body: string): boolean {
@@ -276,8 +288,11 @@ async function route(
     const clip = parseClipRoute(options, clipMatch[1], clipMatch[2]);
     const isUndo = clipMatch[3] !== undefined;
     if (method === 'PUT' && !isUndo) {
+      const cutEndMs = parseCutEndMs(url.searchParams.get('cutEndMs'));
       const audio = await readBody(req, MAX_UPLOAD_BYTES);
-      await inQueue(() => saveClip(options, clip.language, clip.clipId, clip.target, audio));
+      await inQueue(() =>
+        saveClip(options, clip.language, clip.clipId, clip.target, audio, cutEndMs),
+      );
       sendJson(res, 200, { ok: true });
       return;
     }

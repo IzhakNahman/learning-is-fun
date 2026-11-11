@@ -16,6 +16,7 @@ const TOKEN = 'a'.repeat(48);
 /** Fake ffmpeg: "converts" by writing "mp3:" + the input; fake ffprobe says 1 second. */
 const fakeAudioRun: RunCommand = async (program, args) => {
   if (program === 'ffprobe') return { stdout: '1.0\n', stderr: '' };
+  ffmpegFilters.push(args[args.indexOf('-af') + 1] ?? '');
   const input = args[args.indexOf('-i') + 1];
   const output = args.at(-1) ?? '';
   await writeFile(output, `mp3:${await readFile(input, 'utf8')}`);
@@ -28,6 +29,7 @@ let cleanup: () => Promise<void> = async () => {};
 let server: http.Server;
 let base = '';
 let gitCalls: string[][] = [];
+let ffmpegFilters: string[] = [];
 let gitStatusOutput = '';
 
 const fakeGit: GitRunner = async (args) => {
@@ -46,6 +48,7 @@ async function start(tools: AudioTools | null): Promise<void> {
 beforeEach(async () => {
   ({ root, cleanup } = await makeTestRepo());
   gitCalls = [];
+  ffmpegFilters = [];
   gitStatusOutput = '';
   await start(fakeTools);
 });
@@ -173,6 +176,26 @@ describe('saving, deleting and undo', () => {
     await fetch(`${base}/api/clips/he/num-01/undo`, withToken({ method: 'POST' }));
     expect(existsSync(clipFile('num-01'))).toBe(true);
     expect(await manifest()).toEqual(['num-01']);
+  });
+
+  it('cuts the stop click off the end of a recording when asked', async () => {
+    await fetch(`${base}/api/clips/he/num-01`, withToken({ method: 'PUT', body: 'upload' }));
+    await fetch(
+      `${base}/api/clips/he/num-02?cutEndMs=300`,
+      withToken({ method: 'PUT', body: 'recording' }),
+    );
+    expect(ffmpegFilters[0]).not.toContain('atrim');
+    expect(ffmpegFilters[1]).toContain('atrim=start=0.3');
+  });
+
+  it('rejects a bad or too long end cut', async () => {
+    for (const bad of ['abc', '-5', '0.3', '5000']) {
+      const response = await fetch(
+        `${base}/api/clips/he/num-01?cutEndMs=${bad}`,
+        withToken({ method: 'PUT', body: 'x' }),
+      );
+      expect(response.status, bad).toBe(400);
+    }
   });
 
   it('says 404 when deleting a clip that is not recorded', async () => {

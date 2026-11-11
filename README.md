@@ -43,6 +43,8 @@ A local page at http://localhost:5180 for recording and replacing clips. It need
 - **Record**: the browser asks for the microphone once. Keys in the recorder: Space = record / stop
   (or retry after a take), Enter = keep, arrows = previous / next, Esc = close.
   **Next missing clip** goes through the missing clips one after another.
+  Recording starts 1 second after you press Space or click ● Record, and the last 0.3 seconds
+  are cut off, so the key or mouse click is not in the clip.
 - **Upload**: drag an m4a, wav or mp3 file onto a row.
 - Every clip is converted to mono mp3: silence trimmed at both ends, volume evened out.
 - Replaced and deleted clips are copied to `.audio-backup/<lang>/` (ignored by git). **Undo** swaps the last backup back.

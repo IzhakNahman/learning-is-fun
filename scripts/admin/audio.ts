@@ -68,7 +68,20 @@ export const AUDIO_FILTER = [
   `apad=pad_dur=${TAIL_SECONDS}`,
 ].join(',');
 
-export function ffmpegArgs(inputPath: string, outputPath: string): string[] {
+/** Longest end cut allowed, so a mistake can never throw the whole word away. */
+export const MAX_CUT_END_MS = 1000;
+
+/**
+ * Drops the last `cutEndSeconds` of the recording first (the click of the key or mouse that
+ * stopped it), then runs the normal clean-up.
+ */
+export function audioFilter(cutEndSeconds = 0): string {
+  if (cutEndSeconds <= 0) return AUDIO_FILTER;
+  const cutEnd = `areverse,atrim=start=${cutEndSeconds},asetpts=N/SR/TB,areverse`;
+  return `${cutEnd},${AUDIO_FILTER}`;
+}
+
+export function ffmpegArgs(inputPath: string, outputPath: string, cutEndSeconds = 0): string[] {
   return [
     '-hide_banner',
     '-loglevel',
@@ -78,7 +91,7 @@ export function ffmpegArgs(inputPath: string, outputPath: string): string[] {
     inputPath,
     '-vn',
     '-af',
-    AUDIO_FILTER,
+    audioFilter(cutEndSeconds),
     '-ac',
     '1',
     '-ar',
@@ -119,9 +132,10 @@ export async function convertToClip(
   tools: AudioTools,
   inputPath: string,
   outputPath: string,
+  cutEndSeconds = 0,
 ): Promise<void> {
   try {
-    await tools.run(tools.ffmpeg, ffmpegArgs(inputPath, outputPath));
+    await tools.run(tools.ffmpeg, ffmpegArgs(inputPath, outputPath, cutEndSeconds));
   } catch (error) {
     const details = error instanceof Error && 'stderr' in error ? String(error.stderr) : '';
     throw new Error(`ffmpeg could not read this audio. ${details}`.trim());

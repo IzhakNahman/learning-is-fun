@@ -54,8 +54,15 @@ async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
 const clipUrl = (language: Language, clipId: string): string =>
   `/api/clips/${language}/${encodeURIComponent(clipId)}`;
 
-function uploadClip(language: Language, clipId: string, audio: Blob): Promise<unknown> {
-  return api(clipUrl(language, clipId), { method: 'PUT', body: audio });
+/** `cutEndMs` drops the end of a recording on the server (the click that stopped it). */
+function uploadClip(
+  language: Language,
+  clipId: string,
+  audio: Blob,
+  cutEndMs = 0,
+): Promise<unknown> {
+  const query = cutEndMs > 0 ? `?cutEndMs=${cutEndMs}` : '';
+  return api(`${clipUrl(language, clipId)}${query}`, { method: 'PUT', body: audio });
 }
 
 // ---------- page state ----------
@@ -270,7 +277,12 @@ window.addEventListener('drop', (event) => event.preventDefault());
 
 // ---------- recorder ----------
 
-type RecorderPhase = 'idle' | 'recording' | 'review' | 'saving';
+type RecorderPhase = 'idle' | 'waiting' | 'recording' | 'review' | 'saving';
+
+/** Quiet time after pressing Record, so the key or mouse click is not in the take. */
+const WAIT_BEFORE_RECORDING_MS = 1000;
+/** The end of a take is cut off, so the key or mouse click that stopped it is not kept. */
+const STOP_CLICK_CUT_MS = 300;
 
 const recorder = (() => {
   const panel = byId<HTMLElement>('recorder');
@@ -300,6 +312,7 @@ const recorder = (() => {
   let take: Blob | null = null;
   let takeUrl = '';
   let meterFrame = 0;
+  let waitTimer = 0;
 
   const currentId = (): string | undefined => queue[index];
 
@@ -325,14 +338,20 @@ const recorder = (() => {
       : '';
     positionElement.textContent =
       queue.length > 0 ? `${Math.min(index + 1, queue.length)} of ${queue.length}` : '';
-    recordButton.textContent = phase === 'recording' ? '■ Stop' : '● Record';
+    const recordLabels: Partial<Record<RecorderPhase, string>> = {
+      waiting: '✕ Cancel',
+      recording: '■ Stop',
+    };
+    recordButton.textContent = recordLabels[phase] ?? '● Record';
     recordButton.classList.toggle('recording', phase === 'recording');
+    recordButton.classList.toggle('waiting', phase === 'waiting');
     recordButton.disabled = !clip || phase === 'saving' || !state.data?.ffmpegReady;
     playButton.disabled = phase !== 'review';
     keepButton.disabled = phase !== 'review';
     retryButton.disabled = phase !== 'review';
-    prevButton.disabled = index <= 0 || phase === 'recording' || phase === 'saving';
-    nextButton.disabled = index >= queue.length - 1 || phase === 'recording' || phase === 'saving';
+    const busy = phase === 'waiting' || phase === 'recording' || phase === 'saving';
+    prevButton.disabled = index <= 0 || busy;
+    nextButton.disabled = index >= queue.length - 1 || busy;
   }
 
   async function ensureMicrophone(): Promise<MediaStream> {
@@ -365,8 +384,11 @@ const recorder = (() => {
     return options.find((type) => MediaRecorder.isTypeSupported(type)) ?? '';
   }
 
+  /** Gets the microphone ready, then waits a second so the click is over before recording. */
   async function startRecording(): Promise<void> {
-    if (phase === 'recording' || phase === 'saving' || !currentId()) return;
+    if (phase === 'waiting' || phase === 'recording' || phase === 'saving' || !currentId()) {
+      return;
+    }
     stopAllSound();
     let microphone: MediaStream;
     try {
@@ -376,6 +398,22 @@ const recorder = (() => {
       return;
     }
     clearTake();
+    phase = 'waiting';
+    setMessage('Get ready… recording starts in 1 second.');
+    refresh();
+    waitTimer = window.setTimeout(() => beginRecording(microphone), WAIT_BEFORE_RECORDING_MS);
+  }
+
+  function cancelWaiting(): void {
+    if (phase !== 'waiting') return;
+    window.clearTimeout(waitTimer);
+    phase = 'idle';
+    setMessage('Cancelled. Press Space to record.');
+    refresh();
+  }
+
+  function beginRecording(microphone: MediaStream): void {
+    if (phase !== 'waiting' || panel.hidden) return;
     chunks = [];
     const mimeType = pickMimeType();
     mediaRecorder = new MediaRecorder(microphone, mimeType ? { mimeType } : {});
@@ -390,7 +428,7 @@ const recorder = (() => {
     });
     mediaRecorder.start();
     phase = 'recording';
-    setMessage('Recording… press Space to stop.');
+    setMessage('Recording… speak now. Press Space or click ■ Stop when done.');
     refresh();
   }
 
@@ -400,6 +438,10 @@ const recorder = (() => {
   }
 
   function toggleRecording(): void {
+    if (phase === 'waiting') {
+      cancelWaiting();
+      return;
+    }
     if (phase === 'recording') {
       stopRecording();
       return;
@@ -414,7 +456,7 @@ const recorder = (() => {
     setMessage('Saving (converting with ffmpeg)…');
     refresh();
     try {
-      await uploadClip(state.language, clipId, take);
+      await uploadClip(state.language, clipId, take, STOP_CLICK_CUT_MS);
     } catch (error) {
       phase = 'review';
       setMessage(`Not saved: ${errorText(error)}`, true);
@@ -440,7 +482,7 @@ const recorder = (() => {
   }
 
   function move(step: number): void {
-    if (phase === 'recording' || phase === 'saving') return;
+    if (phase === 'waiting' || phase === 'recording' || phase === 'saving') return;
     const nextIndex = index + step;
     if (nextIndex < 0 || nextIndex >= queue.length) return;
     clearTake();
@@ -465,6 +507,7 @@ const recorder = (() => {
   }
 
   function close(): void {
+    window.clearTimeout(waitTimer);
     if (phase === 'recording') mediaRecorder?.stop();
     phase = 'idle';
     clearTake();
