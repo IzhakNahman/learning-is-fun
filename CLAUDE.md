@@ -1,6 +1,6 @@
 # Working rules for this repo
 
-Learning is Fun / לוֹמְדִים בְּכֵיף: a kids learning game in Hebrew and English (TypeScript + Vite, no framework).
+My First Step / הַצַּעַד הָרִאשׁוֹן שֶׁלִּי: a kids learning game in Hebrew and English (TypeScript + Vite, no framework).
 
 ## How to work
 - **Plan first.** Read the relevant code, send a short plan, and wait for an OK before changing anything.

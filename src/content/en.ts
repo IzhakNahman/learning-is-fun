@@ -297,7 +297,7 @@ const GAME_NAMES: Record<GameId, string> = {
 };
 
 const ui: UiText = {
-  appName: 'Learning is Fun',
+  appName: 'My First Step',
   aboutButton: 'About',
   guide: { label: "Let's play!", speech: "Let's play!" },
   credit: 'Created by Izhak Nachman · All rights reserved ©',
@@ -366,9 +366,9 @@ const ui: UiText = {
       '⚠️ No English voice was found on this device – the real version will use recorded audio.',
   },
   about: {
-    title: 'About "Learning is Fun"',
+    title: 'About "My First Step"',
     intro:
-      '"Learning is Fun" is a set of short games for young children, with no sign-up and no data saved. The games teach letters, sounds, numbers and counting, and practise using both hands the way real video games do. You can switch between Hebrew and English with the language button on the home screen.',
+      '"My First Step" is a set of short games for young children, with no sign-up and no data saved. The games teach letters, sounds, numbers and counting, and practise using both hands the way real video games do. You can switch between Hebrew and English with the language button on the home screen.',
     sections: [
       {
         icon: '🔢',

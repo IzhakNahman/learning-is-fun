@@ -1,7 +1,7 @@
 {
   "name": "learning-is-fun",
   "version": "0.2.0",
-  "description": "Learning is Fun – Hebrew & English letters, numbers and words for kids",
+  "description": "My First Step – Hebrew & English letters, numbers and words for kids",
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",

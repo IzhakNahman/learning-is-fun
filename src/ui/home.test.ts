@@ -48,6 +48,19 @@ describe('home road', () => {
     expect(document.querySelector('.stop.has-guide .guide')).not.toBeNull();
   });
 
+  it('uses the drawn baby owl on the "back to the next game" button, not an emoji', () => {
+    const jump = document.querySelector('.road-jump')!;
+    expect(jump.querySelector('svg')).not.toBeNull();
+    expect(jump.textContent).toBe('');
+  });
+
+  it('shows the app name as the title, without emoji', () => {
+    expect(document.querySelector('#home h1')!.textContent).toBe('הַצַּעַד הָרִאשׁוֹן שֶׁלִּי');
+    setLanguage('en');
+    expect(document.querySelector('#home h1')!.textContent).toBe('My First Step');
+    setLanguage('he');
+  });
+
   it('offers niqqud in Hebrew only', () => {
     expect(document.querySelector('.stop-button[data-game="niqqud"]')).not.toBeNull();
     setLanguage('en');

@@ -1,4 +1,4 @@
-# Learning is Fun / לומדים בכיף
+# My First Step / הַצַּעַד הָרִאשׁוֹן שֶׁלִּי
 
 Six short games that teach Hebrew and English letters, sounds, numbers and words to young children.
 No login, no tracking, nothing saved except the chosen language.

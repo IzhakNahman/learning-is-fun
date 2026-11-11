@@ -64,7 +64,7 @@ function renderHome(pack: LanguagePack): void {
     createElement(
       'div',
       { className: 'home-head' },
-      createElement('h1', { text: `☁️ ${pack.ui.appName} ☁️` }),
+      createElement('h1', { text: pack.ui.appName }),
     ),
     road,
     buildBalloonLayer(pack, orientation),
