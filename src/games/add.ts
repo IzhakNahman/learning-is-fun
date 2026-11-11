@@ -10,6 +10,7 @@ import { playTryAgainSound } from '../core/sfx';
 import { SPEECH_RATE, speakPart, speakPartsInOrder } from '../core/voice';
 import { CHEER_MS, buildPrompt, buildStars, cheer, sayWellDone } from '../ui/playScreen';
 import { finishedSet, levelFor } from './rounds';
+import { markStarGameFinished } from '../journey/played';
 import type { Level } from './rounds';
 
 /** Three sums per round, so a set is shorter than in the other games. */
@@ -165,6 +166,7 @@ async function afterMatch(pack: LanguagePack, sum: Sum): Promise<void> {
       ?.replaceWith(buildStars(solvedRounds, ROUNDS_PER_ADD_SET));
   }
   cheer(setFinished);
+  if (setFinished) markStarGameFinished('add');
   await wait(CHEER_MS);
   const playbackId = beginPlayback();
   await speakPartsInOrder(

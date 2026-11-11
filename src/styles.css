@@ -1279,6 +1279,10 @@ button,
     0 0.2vmin 0 var(--edge),
     inset 0 0.4vmin 0 rgba(255, 255, 255, 0.45);
 }
+.stop-button .ic.letter {
+  font-weight: 900;
+}
+
 .stop-button .ic {
   display: flex;
   align-items: center;
@@ -1794,7 +1798,7 @@ button,
   animation: pop 0.35s;
 }
 
-.count-slot {
+.count-answer {
   flex: none;
   min-width: min(20vmin, 110px);
   height: min(12vmin, 70px);
@@ -1810,7 +1814,7 @@ button,
   direction: ltr;
 }
 
-.count-slot.done {
+.count-box.done .count-answer {
   border-style: solid;
   border-color: #51cf66;
   background: #eaffee;
@@ -2069,7 +2073,7 @@ button,
   .count-item.on,
   .draggable.selected,
   .draggable.nudge,
-  .count-slot.done,
+  .count-box.done .count-answer,
   .mix-slot.done,
   .add-slot.done {
     animation: none;

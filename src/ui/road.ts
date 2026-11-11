@@ -15,7 +15,7 @@ import {
   type RoadOrientation,
 } from '../journey/layout';
 import { nextGameToPlay } from '../journey/played';
-import { stopsFor, type StopDefinition } from '../journey/stops';
+import { stopIcon, stopsFor, type StopDefinition } from '../journey/stops';
 import type { UnlockPolicy } from '../journey/unlock';
 import { buildGuide } from './guide';
 
@@ -132,7 +132,10 @@ function buildStop(
   const button = createElement(
     'button',
     { className: 'stop-button', dataset: { game: stop.game } },
-    createElement('span', { className: 'ic', text: stop.icon }),
+    createElement('span', {
+      className: stop.letterIcon === undefined ? 'ic' : 'ic letter',
+      text: stopIcon(stop, pack),
+    }),
     createElement('span', { className: 'gname', text: name }),
   );
   button.style.setProperty('--top', stop.top);

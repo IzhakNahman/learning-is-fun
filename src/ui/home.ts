@@ -5,7 +5,7 @@ import { getPack, onLanguageChange, setLanguage } from '../core/i18n';
 import { navigateTo, registerScreen } from '../core/router';
 import { findVoiceFor } from '../core/speech';
 import type { RoadOrientation } from '../journey/layout';
-import { loadPlayedGames, markGamePlayed, nextGameToPlay } from '../journey/played';
+import { isMarkedOnOpen, loadPlayedGames, markGamePlayed, nextGameToPlay } from '../journey/played';
 import { STOPS, stopsFor } from '../journey/stops';
 import type { GameId } from '../content';
 import { openPolicy } from '../journey/unlock';
@@ -26,9 +26,12 @@ export function initHome(): void {
   renderHome(getPack());
 }
 
-/** Opening a game remembers it, so the road can show a ✓ and point at the next one. */
+/**
+ * Opening a game without stars remembers it, so the road can show a ✓ and point at the next one.
+ * A game with stars gets its ✓ only when the child finishes all the stars.
+ */
 function openGame(game: GameId): void {
-  markGamePlayed(game, STOPS);
+  if (isMarkedOnOpen(game)) markGamePlayed(game, STOPS);
   navigateTo(game);
 }
 

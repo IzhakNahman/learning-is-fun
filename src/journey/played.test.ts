@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { nextGameToPlay, parsePlayedGames } from './played';
+import { STAR_GAMES, isMarkedOnOpen, nextGameToPlay, parsePlayedGames } from './played';
 import { STOPS } from './stops';
 
 const GAMES = STOPS.map((stop) => stop.game);
@@ -32,5 +32,24 @@ describe('nextGameToPlay', () => {
 
   it('has nothing to point at when there are no stops', () => {
     expect(nextGameToPlay([], new Set())).toBeNull();
+  });
+});
+
+describe('the ✓ on the road', () => {
+  it('is only for star games after a whole set of stars, not when they are opened', () => {
+    for (const game of ['lookalike', 'count', 'mix', 'starts', 'add'] as const) {
+      expect(STAR_GAMES.has(game), game).toBe(true);
+      expect(isMarkedOnOpen(game), game).toBe(false);
+    }
+  });
+
+  it('is given on opening to the games that have no stars', () => {
+    for (const game of ['numbers', 'colors', 'shapes', 'letters', 'words', 'trace', 'sky']) {
+      expect(isMarkedOnOpen(game as (typeof GAMES)[number]), game).toBe(true);
+    }
+  });
+
+  it('only lists games that are on the road', () => {
+    for (const game of STAR_GAMES) expect(GAMES).toContain(game);
   });
 });

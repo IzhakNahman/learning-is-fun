@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { chooseTarget, pickTarget, toggleSelection } from './drag';
+import { chooseTarget, makeDraggable, pickTarget, toggleSelection } from './drag';
 
 const box = (left: number, top: number, right: number, bottom: number) => ({
   left,
@@ -83,5 +83,49 @@ describe('tap, then tap', () => {
     source.remove();
     expect(chooseTarget(target)).toBe(false);
     expect(calls).toEqual([]);
+  });
+});
+
+describe('a tap that answers at once', () => {
+  const tapOn = (element: HTMLElement): void => {
+    element.setPointerCapture = () => undefined;
+    element.hasPointerCapture = () => false;
+    element.releasePointerCapture = () => undefined;
+    const init = { pointerId: 1, clientX: 10, clientY: 10, button: 0, bubbles: true };
+    element.dispatchEvent(new PointerEvent('pointerdown', init));
+    element.dispatchEvent(new PointerEvent('pointerup', init));
+  };
+
+  const setup = (right: boolean) => {
+    const source = document.createElement('div');
+    const target = document.createElement('div');
+    document.body.append(source, target);
+    const calls: string[] = [];
+    makeDraggable(source, {
+      targets: () => [target],
+      onDrop: () => true,
+      onReject: () => calls.push('reject'),
+      onTap: () => calls.push('tap'),
+      onTapAnswer: () => {
+        calls.push('answer');
+        return right;
+      },
+    });
+    return { source, target, calls };
+  };
+
+  it('accepts a right tap without selecting anything or asking for a second tap', () => {
+    const { source, target, calls } = setup(true);
+    tapOn(source);
+    expect(calls).toEqual(['tap', 'answer']);
+    expect(source.classList.contains('selected')).toBe(false);
+    expect(target.classList.contains('ready')).toBe(false);
+  });
+
+  it('reports a wrong tap as a rejection, still without selecting', () => {
+    const { source, calls } = setup(false);
+    tapOn(source);
+    expect(calls).toEqual(['tap', 'answer', 'reject']);
+    expect(source.classList.contains('selected')).toBe(false);
   });
 });

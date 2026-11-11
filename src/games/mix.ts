@@ -10,6 +10,7 @@ import { playTryAgainSound } from '../core/sfx';
 import { SPEECH_RATE, speakPart, speakPartsInOrder } from '../core/voice';
 import { CHEER_MS, buildPrompt, buildStars, cheer, sayWellDone } from '../ui/playScreen';
 import { ROUNDS_PER_SET, finishedSet, levelFor } from './rounds';
+import { markStarGameFinished } from '../journey/played';
 import type { Level } from './rounds';
 
 /** Colour ids (see the colour lists in the language packs) that make a new colour when mixed. */
@@ -168,6 +169,7 @@ async function finishRound(
     .querySelector('.play-stars')
     ?.replaceWith(buildStars(solvedRounds, ROUNDS_PER_SET));
   cheer(setFinished);
+  if (setFinished) markStarGameFinished('mix');
   await wait(CHEER_MS);
   const playbackId = beginPlayback();
   await speakPartsInOrder(

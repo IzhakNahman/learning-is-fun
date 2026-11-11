@@ -10,6 +10,7 @@ import { playCountBlip, playTryAgainSound } from '../core/sfx';
 import { SPEECH_RATE, speakPart } from '../core/voice';
 import { CHEER_MS, buildPrompt, buildStars, cheer, sayWellDone } from '../ui/playScreen';
 import { ROUNDS_PER_SET, finishedSet, levelFor } from './rounds';
+import { markStarGameFinished } from '../journey/played';
 import type { Level } from './rounds';
 
 const OBJECTS = ['🍎', '🎈', '⭐', '🐟', '🚗', '🌸', '🐥', '🍪'] as const;
@@ -76,7 +77,6 @@ function renderRound(pack: LanguagePack): void {
     box.append(item);
   }
 
-  const slot = createElement('div', { className: 'count-slot', text: '?' });
   const choices = createElement('div', { className: 'play-choices' });
   for (const number of round.choices) {
     const tile = createElement('div', {
@@ -85,21 +85,20 @@ function renderRound(pack: LanguagePack): void {
       dataset: { number: String(number) },
     });
     makeDraggable(tile, {
-      targets: () => [box, slot],
-      onDrop: () => onNumberDropped(tile, number, box, slot, pack),
+      targets: () => [box],
+      onDrop: () => onNumberChosen(tile, number, box, pack),
       onReject: () => onWrong(choices),
-      onTap: () => void speakPart(countingPart(pack, number), SPEECH_RATE.DEFAULT),
+      // Tapping a number is the answer. A right one passes at once; for a wrong one the child
+      // still hears the number they picked. (The right one is said after the cheer.)
+      onTapAnswer: () => onNumberChosen(tile, number, box, pack),
+      onTap: () => {
+        if (number !== round.count) void speakPart(countingPart(pack, number), SPEECH_RATE.DEFAULT);
+      },
     });
     choices.append(tile);
   }
 
-  root.append(
-    buildPrompt(pack, 'count'),
-    buildStars(solvedRounds, ROUNDS_PER_SET),
-    box,
-    slot,
-    choices,
-  );
+  root.append(buildPrompt(pack, 'count'), buildStars(solvedRounds, ROUNDS_PER_SET), box, choices);
 }
 
 /** Counting by tapping: the objects up to the tapped one light up and its number is said. */
@@ -110,19 +109,18 @@ async function onItemTapped(box: HTMLElement, position: number, pack: LanguagePa
   await speakPart(countingPart(pack, position), SPEECH_RATE.COUNTING);
 }
 
-function onNumberDropped(
+/** The child picked a number, by tapping it or by dragging it onto the group. */
+function onNumberChosen(
   tile: HTMLElement,
   number: number,
   box: HTMLElement,
-  slot: HTMLElement,
   pack: LanguagePack,
 ): boolean {
   if (busy || number !== round.count) return false;
   busy = true;
-  slot.textContent = String(number);
-  slot.classList.add('done');
   tile.classList.add('placed');
   [...box.children].forEach((item) => item.classList.add('on'));
+  box.append(createElement('div', { className: 'count-answer', text: String(number) }));
   box.classList.add('done');
   box.dataset.answer = String(number);
   solvedRounds += 1;
@@ -136,6 +134,7 @@ async function finishRound(pack: LanguagePack): Promise<void> {
     .querySelector('.play-stars')
     ?.replaceWith(buildStars(solvedRounds, ROUNDS_PER_SET));
   cheer(setFinished);
+  if (setFinished) markStarGameFinished('count');
   await wait(CHEER_MS);
   beginPlayback();
   await speakPart(countingPart(pack, round.count), SPEECH_RATE.DEFAULT);

@@ -14,9 +14,9 @@ and list the ids in public/audio/he/manifest.json. Clips that are missing fall b
 | game-name-letters | הַכָּרַת הָאוֹתִיּוֹת |
 | game-name-count | כַּמָּה יֵשׁ? |
 | game-name-trace | כְּתִיבַת אוֹתִיּוֹת |
-| game-name-mix | עוֹרְבִים צְבָעִים |
+| game-name-mix | שִׁילּוּב צְבָעִים |
 | game-name-words | אוֹצַר מִלִּים |
-| game-name-starts | אוֹת הַתְּחָלָה |
+| game-name-starts | אוֹת מַתְחִילָה |
 | game-name-add | מְחַבְּרִים |
 | game-name-sky | מִשְׂחַק הַמִּלִּים |
 | game-name-niqqud | הַכָּרַת הַנִּקּוּד |

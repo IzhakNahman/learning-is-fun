@@ -56,6 +56,11 @@ export interface DraggableOptions {
   /** Called when the drop was on nothing, or was not accepted. */
   onReject?: () => void;
   onTap?: () => void;
+  /**
+   * When set, a tap is the answer itself: nothing is selected, and the game says at once whether
+   * the tap was right. A wrong tap calls `onReject`. Dragging onto a target still works.
+   */
+  onTapAnswer?: () => boolean;
 }
 
 /**
@@ -161,10 +166,14 @@ export function makeDraggable(element: HTMLElement, options: DraggableOptions): 
     }
     if (!moved) {
       element.classList.remove('dragging');
-      if (!cancelled) {
-        toggleSelection(element, tapOptions);
+      if (cancelled) return;
+      if (options.onTapAnswer) {
         options.onTap?.();
+        if (!options.onTapAnswer()) options.onReject?.();
+        return;
       }
+      toggleSelection(element, tapOptions);
+      options.onTap?.();
       return;
     }
     const targets = options.targets();

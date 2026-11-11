@@ -376,14 +376,14 @@ const ui: UiText = {
         body: 'Children get to know the numbers 1–20: how they look, how they sound and how they are written as words. Colourful balls in rows of five show the quantity itself, and counting out loud links the symbol, the name and the amount.',
       },
       {
-        icon: '🔤',
+        icon: 'A',
         game: 'letters',
         body: 'The name and the sound of every letter. In English the sound is the phonics sound used for reading. Children see and hear each letter again and again at their own pace.',
       },
       {
         icon: '🧺',
         game: 'count',
-        body: 'A group of objects appears. The child counts them (tapping an object counts out loud) and taps the right number, then the group. It starts with small numbers up to 5, then goes up to 10. A mistake simply slides the number back, and after two mistakes the right number lights up.',
+        body: 'A group of objects appears. The child counts them (tapping an object counts out loud) and taps the right number (dragging it onto the group works too). It starts with small numbers up to 5, then goes up to 10. A mistake simply slides the number back, and after two mistakes the right number lights up.',
       },
       {
         icon: '✏️',
@@ -416,7 +416,7 @@ const ui: UiText = {
         body: 'One word and picture for every letter. Each tap plays a fixed sequence: letter name, letter, sound, word. This helps children connect the first sound of a word with its letter, which is the foundation of reading.',
       },
       {
-        icon: '🔠',
+        icon: 'C',
         game: 'starts',
         body: 'A picture appears and the child taps it and then taps the letter the word starts with. After the right answer the child hears the word and the letter sound.',
       },

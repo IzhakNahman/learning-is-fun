@@ -42,3 +42,12 @@ describe('STOPS', () => {
     expect(stopsFor(packs.en)).toHaveLength(STOPS.length - 1);
   });
 });
+
+describe('game names', () => {
+  const plain = (text: string): string => text.replace(/[\u0591-\u05C7]/gu, '');
+
+  it('calls the Hebrew games "שילוב צבעים" and "אות מתחילה"', () => {
+    expect(plain(packs.he.ui.gameNames.mix)).toBe('שילוב צבעים');
+    expect(plain(packs.he.ui.gameNames.starts)).toBe('אות מתחילה');
+  });
+});
