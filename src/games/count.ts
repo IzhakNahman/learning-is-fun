@@ -67,11 +67,16 @@ function renderRound(pack: LanguagePack): void {
     id: 'countbox',
   });
   for (let position = 1; position <= round.count; position++) {
-    const item = createElement('button', { className: 'count-item', text: round.object });
+    const item = createElement('button', {
+      className: 'count-item',
+      text: round.object,
+      dataset: { keepTap: '1' },
+    });
     item.addEventListener('click', () => void onItemTapped(box, position, pack));
     box.append(item);
   }
 
+  const slot = createElement('div', { className: 'count-slot', text: '?' });
   const choices = createElement('div', { className: 'play-choices' });
   for (const number of round.choices) {
     const tile = createElement('div', {
@@ -80,15 +85,21 @@ function renderRound(pack: LanguagePack): void {
       dataset: { number: String(number) },
     });
     makeDraggable(tile, {
-      targets: () => [box],
-      onDrop: () => onNumberDropped(tile, number, box, pack),
+      targets: () => [box, slot],
+      onDrop: () => onNumberDropped(tile, number, box, slot, pack),
       onReject: () => onWrong(choices),
       onTap: () => void speakPart(countingPart(pack, number), SPEECH_RATE.DEFAULT),
     });
     choices.append(tile);
   }
 
-  root.append(buildPrompt(pack, 'count'), buildStars(solvedRounds, ROUNDS_PER_SET), box, choices);
+  root.append(
+    buildPrompt(pack, 'count'),
+    buildStars(solvedRounds, ROUNDS_PER_SET),
+    box,
+    slot,
+    choices,
+  );
 }
 
 /** Counting by tapping: the objects up to the tapped one light up and its number is said. */
@@ -103,10 +114,13 @@ function onNumberDropped(
   tile: HTMLElement,
   number: number,
   box: HTMLElement,
+  slot: HTMLElement,
   pack: LanguagePack,
 ): boolean {
   if (busy || number !== round.count) return false;
   busy = true;
+  slot.textContent = String(number);
+  slot.classList.add('done');
   tile.classList.add('placed');
   [...box.children].forEach((item) => item.classList.add('on'));
   box.classList.add('done');

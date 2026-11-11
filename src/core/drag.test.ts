@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { pickTarget } from './drag';
+import { chooseTarget, pickTarget, toggleSelection } from './drag';
 
 const box = (left: number, top: number, right: number, bottom: number) => ({
   left,
@@ -29,5 +29,59 @@ describe('pickTarget', () => {
     const overlapping = [box(0, 0, 100, 100), box(60, 0, 160, 100)];
     expect(pickTarget({ x: 70, y: 50 }, overlapping)).toBe(0);
     expect(pickTarget({ x: 90, y: 50 }, overlapping)).toBe(1);
+  });
+});
+
+describe('tap, then tap', () => {
+  const setup = (accept: boolean) => {
+    const source = document.createElement('div');
+    const target = document.createElement('div');
+    document.body.append(source, target);
+    const calls: string[] = [];
+    const options = {
+      targets: () => [target],
+      onDrop: () => {
+        calls.push('drop');
+        return accept;
+      },
+      onReject: () => calls.push('reject'),
+    };
+    return { source, target, calls, options };
+  };
+
+  it('selects a thing, marks the places, and puts it down on the tapped place', () => {
+    const { source, target, calls, options } = setup(true);
+    toggleSelection(source, options);
+    expect(source.classList.contains('selected')).toBe(true);
+    expect(target.classList.contains('ready')).toBe(true);
+    expect(chooseTarget(target)).toBe(true);
+    expect(calls).toEqual(['drop']);
+    expect(source.classList.contains('selected')).toBe(false);
+    expect(target.classList.contains('ready')).toBe(false);
+  });
+
+  it('reports a wrong place as a rejection and clears the selection', () => {
+    const { source, target, calls, options } = setup(false);
+    toggleSelection(source, options);
+    chooseTarget(target);
+    expect(calls).toEqual(['drop', 'reject']);
+    expect(chooseTarget(target)).toBe(false);
+  });
+
+  it('unselects when the same thing is tapped again, and does nothing without a selection', () => {
+    const { source, target, calls, options } = setup(true);
+    toggleSelection(source, options);
+    toggleSelection(source, options);
+    expect(source.classList.contains('selected')).toBe(false);
+    expect(chooseTarget(target)).toBe(false);
+    expect(calls).toEqual([]);
+  });
+
+  it('ignores a selection whose thing has left the screen', () => {
+    const { source, target, calls, options } = setup(true);
+    toggleSelection(source, options);
+    source.remove();
+    expect(chooseTarget(target)).toBe(false);
+    expect(calls).toEqual([]);
   });
 });

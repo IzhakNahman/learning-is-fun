@@ -58,8 +58,88 @@ export interface DraggableOptions {
   onTap?: () => void;
 }
 
+/**
+ * "Tap, then tap": the child taps the thing to move (it lights up) and then taps the place it
+ * belongs. Every draggable also works this way, so no game needs dragging to be played.
+ */
+interface Selection {
+  element: HTMLElement;
+  options: DraggableOptions;
+}
+
+let selection: Selection | null = null;
+const liveSources = new Set<HTMLElement>();
+const wiredTargets = new WeakSet<HTMLElement>();
+const NUDGE_MS = 600;
+
+function setReadyTargets(on: boolean): void {
+  if (!selection) return;
+  selection.options.targets().forEach((target) => target.classList.toggle('ready', on));
+}
+
+export function clearSelection(): void {
+  if (!selection) return;
+  setReadyTargets(false);
+  selection.element.classList.remove('selected');
+  selection = null;
+}
+
+/** Tapping the selected thing again puts it down; tapping another one switches to it. */
+export function toggleSelection(element: HTMLElement, options: DraggableOptions): void {
+  const wasSelected = selection?.element === element;
+  clearSelection();
+  if (wasSelected || element.dataset.locked === '1') return;
+  selection = { element, options };
+  element.classList.add('selected');
+  setReadyTargets(true);
+}
+
+/** The child tapped a place: put the selected thing there if the game accepts it. */
+export function chooseTarget(target: HTMLElement): boolean {
+  if (!selection) return false;
+  if (!selection.element.isConnected) {
+    selection = null;
+    return false;
+  }
+  const { options } = selection;
+  clearSelection();
+  if (options.onDrop(target)) return true;
+  options.onReject?.();
+  return true;
+}
+
+/** A place was tapped with nothing selected: gently point at the things that can be picked. */
+function nudgeSources(): void {
+  for (const source of liveSources) {
+    if (!source.isConnected) {
+      liveSources.delete(source);
+      continue;
+    }
+    source.classList.add('nudge');
+    window.setTimeout(() => source.classList.remove('nudge'), NUDGE_MS);
+  }
+}
+
+function wireTarget(target: HTMLElement): void {
+  if (wiredTargets.has(target)) return;
+  wiredTargets.add(target);
+  target.addEventListener('click', (event) => {
+    // Taps on parts inside a target (like the objects being counted) keep their own meaning.
+    if ((event.target as HTMLElement).closest?.('[data-keep-tap]')) return;
+    if (!chooseTarget(target)) {
+      nudgeSources();
+      return;
+    }
+    event.stopPropagation();
+  });
+}
+
 export function makeDraggable(element: HTMLElement, options: DraggableOptions): void {
   element.classList.add('draggable');
+  liveSources.add(element);
+  // The game fills in its targets right after this call, so wire them a moment later.
+  queueMicrotask(() => options.targets().forEach(wireTarget));
+  const tapOptions = options;
   let activePointer: number | null = null;
   let start: Point = { x: 0, y: 0 };
   let moved = false;
@@ -81,7 +161,10 @@ export function makeDraggable(element: HTMLElement, options: DraggableOptions): 
     }
     if (!moved) {
       element.classList.remove('dragging');
-      if (!cancelled) options.onTap?.();
+      if (!cancelled) {
+        toggleSelection(element, tapOptions);
+        options.onTap?.();
+      }
       return;
     }
     const targets = options.targets();

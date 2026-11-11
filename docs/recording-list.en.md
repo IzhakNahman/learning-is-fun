@@ -221,11 +221,11 @@ and list the ids in public/audio/en/manifest.json. Clips that are missing fall b
 | phrase-tap-trace | Pick a letter to write |
 | phrase-tap-colors | Tap a colour |
 | phrase-tap-shapes | Tap a shape |
-| phrase-tap-lookalike | Drag the picture to the shape it looks like |
-| phrase-tap-count | Drag the right number |
-| phrase-tap-mix | Drag the colour you get |
-| phrase-tap-starts | Drag the picture to the letter it starts with |
-| phrase-tap-add | Drag each answer to its sum |
+| phrase-tap-lookalike | Tap the picture, then tap the shape it looks like |
+| phrase-tap-count | Tap the right number, then tap the group |
+| phrase-tap-mix | Tap the colour you get, then tap the empty circle |
+| phrase-tap-starts | Tap the picture, then tap the letter it starts with |
+| phrase-tap-add | Tap an answer, then tap its sum |
 | phrase-game-over | Game over! You got |
 | phrase-0-words | zero words |
 | phrase-1-word | one word |

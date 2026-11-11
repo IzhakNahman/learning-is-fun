@@ -308,24 +308,24 @@ const ui: UiText = {
   colors: { placeholder: 'Tap a colour', placeholderSpeech: 'Tap a colour' },
   shapes: { placeholder: 'Tap a shape', placeholderSpeech: 'Tap a shape' },
   lookalike: {
-    placeholder: 'Drag the picture to the shape it looks like',
-    placeholderSpeech: 'Drag the picture to the shape it looks like',
+    placeholder: 'Tap the picture, then tap the shape it looks like',
+    placeholderSpeech: 'Tap the picture, then tap the shape it looks like',
   },
   count: {
-    placeholder: 'Drag the right number',
-    placeholderSpeech: 'Drag the right number',
+    placeholder: 'Tap the right number, then tap the group',
+    placeholderSpeech: 'Tap the right number, then tap the group',
   },
   mix: {
-    placeholder: 'Drag the colour you get',
-    placeholderSpeech: 'Drag the colour you get',
+    placeholder: 'Tap the colour you get, then tap the empty circle',
+    placeholderSpeech: 'Tap the colour you get, then tap the empty circle',
   },
   starts: {
-    placeholder: 'Drag the picture to the letter it starts with',
-    placeholderSpeech: 'Drag the picture to the letter it starts with',
+    placeholder: 'Tap the picture, then tap the letter it starts with',
+    placeholderSpeech: 'Tap the picture, then tap the letter it starts with',
   },
   add: {
-    placeholder: 'Drag each answer to its sum',
-    placeholderSpeech: 'Drag each answer to its sum',
+    placeholder: 'Tap an answer, then tap its sum',
+    placeholderSpeech: 'Tap an answer, then tap its sum',
   },
   // Not shown in English (see GAME_NAMES).
   niqqud: { placeholder: 'Tap a vowel mark', placeholderSpeech: 'Tap a vowel mark' },
@@ -383,7 +383,7 @@ const ui: UiText = {
       {
         icon: '🧺',
         game: 'count',
-        body: 'A group of objects appears. The child counts them (tapping an object counts out loud) and drags the right number onto the group. It starts with small numbers up to 5, then goes up to 10. A mistake simply slides the number back, and after two mistakes the right number lights up.',
+        body: 'A group of objects appears. The child counts them (tapping an object counts out loud) and taps the right number, then the group. It starts with small numbers up to 5, then goes up to 10. A mistake simply slides the number back, and after two mistakes the right number lights up.',
       },
       {
         icon: '✏️',
@@ -393,7 +393,7 @@ const ui: UiText = {
       {
         icon: '🌈',
         game: 'mix',
-        body: 'Two colours appear on one side of the board and the child drags the colour you get when they are mixed (for example red plus yellow makes orange).',
+        body: 'Two colours appear on one side of the board and the child taps the colour you get when they are mixed, then the empty circle (for example red plus yellow makes orange).',
       },
       {
         icon: '🎨',
@@ -408,7 +408,7 @@ const ui: UiText = {
       {
         icon: '🍕',
         game: 'lookalike',
-        body: 'A picture appears (for example a pizza) and the child drags it to the shape it looks like (a triangle). It starts with two shapes to choose from, then three, including look-alikes such as a square and a rectangle. Tapping the picture says its name, and after a right answer the child hears the picture and the shape.',
+        body: 'A picture appears (for example a pizza) and the child taps it and then taps the shape it looks like (a triangle). It starts with two shapes to choose from, then three, including look-alikes such as a square and a rectangle. Tapping the picture says its name, and after a right answer the child hears the picture and the shape.',
       },
       {
         icon: '🖼️',
@@ -418,12 +418,12 @@ const ui: UiText = {
       {
         icon: '🔠',
         game: 'starts',
-        body: 'A picture appears and the child drags it to the letter the word starts with. After the right answer the child hears the word and the letter sound.',
+        body: 'A picture appears and the child taps it and then taps the letter the word starts with. After the right answer the child hears the word and the letter sound.',
       },
       {
         icon: '➕',
         game: 'add',
-        body: 'Three adding sums made with objects (for example two plus one) and three answers. The child drags each answer onto its sum. It starts with answers up to 5, then up to 10, and every sum is said out loud.',
+        body: 'Three adding sums made with objects (for example two plus one) and three answers. The child taps an answer and then taps its sum. It starts with answers up to 5, then up to 10, and every sum is said out loud.',
       },
       {
         icon: '🎁',

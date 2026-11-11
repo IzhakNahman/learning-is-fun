@@ -1794,6 +1794,69 @@ button,
   animation: pop 0.35s;
 }
 
+.count-slot {
+  flex: none;
+  min-width: min(20vmin, 110px);
+  height: min(12vmin, 70px);
+  padding-inline: 2vmin;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0.8vmin dashed #8fb4e8;
+  border-radius: 3vmin;
+  font-size: min(8vmin, 48px);
+  font-weight: 900;
+  color: #8fb4e8;
+  direction: ltr;
+}
+
+.count-slot.done {
+  border-style: solid;
+  border-color: #51cf66;
+  background: #eaffee;
+  color: #1b4fa0;
+  animation: pop 0.35s;
+}
+
+/* tap, then tap: the picked thing glows, and the places it can go are marked */
+.draggable.selected {
+  outline: 1.2vmin solid #ffd43b;
+  outline-offset: 0.6vmin;
+  scale: 1.08;
+  z-index: 5;
+  animation: select-bob 0.7s ease-in-out infinite;
+}
+
+@keyframes select-bob {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -1vmin;
+  }
+}
+
+.ready {
+  outline: 0.8vmin dashed #ffb300;
+  outline-offset: 0.5vmin;
+  cursor: pointer;
+}
+
+.draggable.nudge {
+  animation: nudge-pulse 0.6s ease-in-out;
+}
+
+@keyframes nudge-pulse {
+  0%,
+  100% {
+    scale: 1;
+  }
+  40% {
+    scale: 1.14;
+  }
+}
+
 /* mix colours */
 .mix-board {
   flex: 1;
@@ -2004,6 +2067,9 @@ button,
   .draggable.hint,
   .play-stars .star.on,
   .count-item.on,
+  .draggable.selected,
+  .draggable.nudge,
+  .count-slot.done,
   .mix-slot.done,
   .add-slot.done {
     animation: none;
