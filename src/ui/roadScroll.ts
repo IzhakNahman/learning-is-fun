@@ -1,6 +1,7 @@
 import type { GameId, LanguagePack } from '../content';
 import { createElement } from '../core/dom';
 import type { RoadOrientation } from '../journey/layout';
+import { buildOwl } from './guide';
 
 /** A scroll position that puts `center` in the middle of the view, kept inside the content. */
 export function scrollTargetFor(center: number, viewSize: number, contentSize: number): number {
@@ -71,7 +72,8 @@ export function setUpRoadScrolling(
     scrollTo(scrollTargetFor((box.start + box.end) / 2, view, content), smooth);
   };
 
-  const jump = createElement('button', { className: 'road-jump', text: '🦉' });
+  // The same baby owl as the guide, so the button clearly means "back to the owl".
+  const jump = createElement('button', { className: 'road-jump' }, buildOwl());
   jump.setAttribute('aria-label', pack.ui.nextGame);
   jump.title = pack.ui.nextGame;
   jump.addEventListener('click', () => goToNextGame(true));

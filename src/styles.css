@@ -1946,8 +1946,10 @@ button,
   border: 0.5vmin solid #fff;
   border-radius: 50%;
   background: #ffd23f;
-  font-size: clamp(26px, 5.4vmin, 42px);
-  line-height: 1;
+  box-sizing: border-box;
+  padding: 0;
+  display: grid;
+  place-items: center;
   box-shadow: 0 0.8vmin 0 rgba(0, 0, 0, 0.22);
   cursor: pointer;
   opacity: 0;
@@ -1956,6 +1958,11 @@ button,
   transition:
     opacity 0.25s,
     scale 0.25s;
+}
+.road-jump svg {
+  width: 78%;
+  height: 78%;
+  display: block;
 }
 .road-wrap.next-hidden .road-jump {
   opacity: 1;
