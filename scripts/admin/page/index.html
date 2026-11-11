@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="admin-token" content="__ADMIN_TOKEN__" />
+    <title>Audio admin – Learning is Fun</title>
+    <style>
+      :root {
+        --bg: #f6f7fb;
+        --card: #fff;
+        --text: #1d2433;
+        --muted: #6b7385;
+        --line: #e3e6ee;
+        --accent: #3a6df0;
+        --ok: #1f9d55;
+        --missing: #c2410c;
+        --rec: #dc2626;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font:
+          15px/1.4 -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: var(--card);
+        border-bottom: 1px solid var(--line);
+        padding: 10px 16px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+      header h1 {
+        font-size: 17px;
+        margin: 0 12px 0 0;
+      }
+      button {
+        font: inherit;
+        border: 1px solid var(--line);
+        background: var(--card);
+        border-radius: 8px;
+        padding: 5px 10px;
+        cursor: pointer;
+      }
+      button:hover:not(:disabled) {
+        border-color: var(--accent);
+      }
+      button:disabled {
+        opacity: 0.35;
+        cursor: default;
+      }
+      button.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+      }
+      button.tab[aria-selected='true'] {
+        background: var(--text);
+        color: #fff;
+        border-color: var(--text);
+      }
+      input[type='search'] {
+        font: inherit;
+        padding: 5px 10px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        min-width: 180px;
+      }
+      .progress {
+        font-weight: 600;
+        direction: ltr;
+        unicode-bidi: isolate;
+      }
+      .spacer {
+        flex: 1;
+      }
+      .banner {
+        margin: 12px 16px 0;
+        padding: 10px 14px;
+        border-radius: 8px;
+        background: #fff4e5;
+        border: 1px solid #f5c27a;
+        white-space: pre-wrap;
+      }
+      main {
+        padding: 8px 16px 220px;
+      }
+      h2 {
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--muted);
+        margin: 20px 0 6px;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 200px 1fr 90px auto;
+        gap: 12px;
+        align-items: center;
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 6px 10px;
+        margin-bottom: 4px;
+      }
+      .row.drop-target {
+        outline: 2px dashed var(--accent);
+      }
+      .row.busy {
+        opacity: 0.55;
+      }
+      .clip-id {
+        font-family: ui-monospace, Menlo, monospace;
+        font-size: 13px;
+        color: var(--muted);
+        direction: ltr;
+        overflow-wrap: anywhere;
+      }
+      .say {
+        font-size: 22px;
+      }
+      .say small {
+        display: block;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .status {
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .status.recorded {
+        color: var(--ok);
+      }
+      .status.missing {
+        color: var(--missing);
+      }
+      .actions {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+      }
+      .recorder {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 3;
+        background: var(--card);
+        border-top: 2px solid var(--accent);
+        box-shadow: 0 -6px 20px rgb(0 0 0 / 0.08);
+        padding: 14px 16px;
+      }
+      .recorder[hidden] {
+        display: none;
+      }
+      .recorder .top {
+        display: flex;
+        gap: 12px;
+        align-items: baseline;
+        flex-wrap: wrap;
+      }
+      .recorder .big {
+        font-size: 40px;
+        font-weight: 600;
+      }
+      .recorder .controls {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+        align-items: center;
+      }
+      .recorder .hint {
+        color: var(--muted);
+        font-size: 13px;
+      }
+      .meter {
+        height: 12px;
+        width: 260px;
+        background: var(--line);
+        border-radius: 6px;
+        overflow: hidden;
+      }
+      .meter div {
+        height: 100%;
+        width: 0;
+        background: var(--ok);
+        transition: width 50ms linear;
+      }
+      .meter.loud div {
+        background: var(--rec);
+      }
+      button.recording {
+        background: var(--rec);
+        border-color: var(--rec);
+        color: #fff;
+      }
+      .message {
+        font-size: 13px;
+        color: var(--muted);
+        min-height: 1.4em;
+      }
+      .message.error {
+        color: var(--rec);
+      }
+      dialog {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        max-width: 640px;
+        width: 92vw;
+      }
+      dialog pre {
+        background: var(--bg);
+        padding: 8px;
+        border-radius: 6px;
+        max-height: 300px;
+        overflow: auto;
+        white-space: pre-wrap;
+        direction: ltr;
+      }
+      @media (max-width: 760px) {
+        .row {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Audio admin</h1>
+      <button class="tab" id="tab-he" lang="he" aria-selected="true">עִבְרִית</button>
+      <button class="tab" id="tab-en" aria-selected="false">English</button>
+      <span class="progress" id="progress"></span>
+      <input type="search" id="search" placeholder="Search id or text" />
+      <label><input type="checkbox" id="missing-only" /> Missing only</label>
+      <span class="spacer"></span>
+      <button id="next-missing" class="primary">Next missing clip</button>
+      <button id="publish">Publish…</button>
+    </header>
+    <div class="banner" id="banner" hidden></div>
+    <main id="list"></main>
+
+    <section class="recorder" id="recorder" hidden>
+      <div class="top">
+        <span class="big" id="rec-text"></span>
+        <span class="clip-id" id="rec-id"></span>
+        <span class="hint" id="rec-position"></span>
+      </div>
+      <div class="controls">
+        <button id="rec-prev" title="Previous (↑ or ←)">◀ Prev</button>
+        <button id="rec-record" title="Space">● Record</button>
+        <div class="meter" id="rec-meter"><div></div></div>
+        <button id="rec-play" title="Play what you just recorded">▶ Play take</button>
+        <button id="rec-keep" class="primary" title="Enter">✓ Keep</button>
+        <button id="rec-retry">↺ Retry</button>
+        <button id="rec-voice">🔊 Device voice</button>
+        <button id="rec-next" title="Next (↓ or →)">Next ▶</button>
+        <span class="spacer"></span>
+        <button id="rec-close" title="Esc">Close</button>
+      </div>
+      <div class="hint">Space = record / stop · Enter = keep · ↑ ↓ ← → = move · Esc = close</div>
+      <div class="message" id="rec-message"></div>
+    </section>
+
+    <dialog id="publish-dialog">
+      <h3>Publish audio</h3>
+      <p id="publish-summary"></p>
+      <pre id="publish-files"></pre>
+      <p class="message" id="publish-message"></p>
+      <form method="dialog" style="display: flex; gap: 8px; justify-content: flex-end">
+        <button value="cancel">Cancel</button>
+        <button id="publish-confirm" class="primary" value="confirm">Commit and push</button>
+      </form>
+    </dialog>
+
+    <script type="module" src="/admin.js"></script>
+  </body>
+</html>

@@ -126,3 +126,18 @@ describe('Hebrew speech has niqqud', () => {
     }
   });
 });
+
+describe('recording display text', () => {
+  const byId = new Map(listRecordingItems(packs.he).map((item) => [item.clipId, item]));
+
+  it('shows the normal spelling when the voice text is spelled differently on purpose', () => {
+    expect(byId.get('letter-name-fe')?.speech).toBe('ףֵא');
+    expect(byId.get('letter-name-fe')?.display).toBe('פֵא');
+    expect(byId.get('letter-name-khaf')?.display).toBe('כַף');
+  });
+
+  it('has no display text when it would equal the voice text', () => {
+    expect(byId.get('letter-name-alef')?.display).toBeUndefined();
+    expect(byId.get('letter-sound-alef')?.display).toBeUndefined();
+  });
+});

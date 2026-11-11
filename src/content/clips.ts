@@ -111,6 +111,8 @@ export function wordPart(pack: LanguagePack, wordId: string): SpokenPart | null 
 export interface RecordingItem {
   clipId: string;
   speech: string;
+  /** The normal spelling to show the person recording, when the voice text is spelled oddly on purpose. */
+  display?: string;
   group:
     | 'game names'
     | 'letter names'
@@ -124,6 +126,11 @@ export interface RecordingItem {
     | 'phrases';
 }
 
+function shownIfDifferent(shown: string, speech: string): { display?: string } {
+  if (shown === speech) return {};
+  return { display: shown };
+}
+
 /** Every clip the app can play for a language. The recording lists are generated from this. */
 export function listRecordingItems(pack: LanguagePack): RecordingItem[] {
   const items: RecordingItem[] = [];
@@ -134,6 +141,7 @@ export function listRecordingItems(pack: LanguagePack): RecordingItem[] {
     items.push({
       clipId: `letter-name-${entry.id}`,
       speech: entry.nameSpeech,
+      ...shownIfDifferent(entry.name, entry.nameSpeech),
       group: 'letter names',
     });
   }
@@ -144,6 +152,7 @@ export function listRecordingItems(pack: LanguagePack): RecordingItem[] {
     items.push({
       clipId: `letter-sound-${entry.id}`,
       speech: entry.soundSpeech,
+      ...shownIfDifferent(entry.soundText, entry.soundSpeech),
       group: 'letter sounds',
     });
   }

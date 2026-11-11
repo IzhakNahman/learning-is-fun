@@ -10,6 +10,7 @@ npm run dev          # local dev server
 npm run build        # type-check + one self-contained dist/index.html
 npm run check        # type-check, lint, tests
 npm run recording-lists   # regenerate docs/recording-list.<lang>.md
+npm run admin        # local page for recording and replacing audio clips
 ```
 
 ## Structure
@@ -32,6 +33,26 @@ per letter, working counting, and unique audio ids.
 Put `<clip id>.mp3` files in `public/audio/<lang>/` and list their ids in that folder's `manifest.json`.
 Any clip that is missing falls back to the device voice, so recordings can be added gradually.
 Clip ids and wording are in `docs/recording-list.<lang>.md`.
+
+## Audio admin (`npm run admin`)
+A local page at http://localhost:5180 for recording and replacing clips. It needs ffmpeg
+(`brew install ffmpeg`; install Homebrew from brew.sh first if `brew` is missing).
+
+- Every clip for Hebrew and English, grouped like the game, comes from the same language packs the game uses.
+  Each row has: play my recording, hear the device voice, record, delete, undo. You can also show missing clips only, search, and see progress.
+- **Record**: the browser asks for the microphone once. Keys in the recorder: Space = record / stop
+  (or retry after a take), Enter = keep, arrows = previous / next, Esc = close.
+  **Next missing clip** goes through the missing clips one after another.
+- **Upload**: drag an m4a, wav or mp3 file onto a row.
+- Every clip is converted to mono mp3: silence trimmed at both ends, volume evened out.
+- Replaced and deleted clips are copied to `.audio-backup/<lang>/` (ignored by git). **Undo** swaps the last backup back.
+- `public/audio/<lang>/manifest.json` is rewritten from the files that exist after every change.
+- **Publish** shows the changes, and after you confirm runs `git add`, `git commit` and `git push` for `public/audio` only.
+  A push to `main` updates the live game.
+- Safety: the server listens on 127.0.0.1 only, accepts only clip ids from the language packs, writes only in
+  `public/audio/<lang>/`, and refuses requests that don't come from its own page (host, origin and a per-run token).
+
+Code: `scripts/admin/` (server, tests next to each file) and `scripts/admin/page/` (the page).
 
 ## Code conventions
 - Early returns (guard clauses) instead of nested ifs.

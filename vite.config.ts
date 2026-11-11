@@ -7,5 +7,5 @@ export default defineConfig({
   base: './',
   plugins: [viteSingleFile()],
   build: { target: 'es2022', outDir: 'dist' },
-  test: { environment: 'happy-dom', include: ['src/**/*.test.ts'] },
+  test: { environment: 'happy-dom', include: ['src/**/*.test.ts', 'scripts/**/*.test.ts'] },
 });

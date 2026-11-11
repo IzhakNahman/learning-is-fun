@@ -12,7 +12,8 @@
     "format": "prettier --write src scripts",
     "recording-lists": "tsx scripts/recording-lists.ts",
     "voicelab": "tsx scripts/voicelab.ts",
-    "check": "npm run typecheck && npm run lint && npm test"
+    "check": "npm run typecheck && npm run lint && npm test",
+    "admin": "tsx scripts/admin/main.ts"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",
