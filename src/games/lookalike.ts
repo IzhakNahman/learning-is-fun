@@ -1,3 +1,4 @@
+import { finishRoundGame } from '../ui/progressUi';
 import { lookalikeNamePart, shapeNamePart } from '../content';
 import type { LanguagePack, LookalikeEntry, ShapeEntry } from '../content';
 import { byId, clearChildren, createElement, wait } from '../core/dom';
@@ -11,7 +12,6 @@ import { SPEECH_RATE, speakPart, speakPartsInOrder } from '../core/voice';
 import { CHEER_MS, buildPrompt, buildStars, cheer, sayWellDone } from '../ui/playScreen';
 import { buildShapeSvg, shapeColor } from './shapeArt';
 import { ROUNDS_PER_SET, finishedSet, levelFor } from './rounds';
-import { markStarGameFinished } from '../journey/played';
 import type { Level } from './rounds';
 
 const CHOICES_BY_LEVEL: Record<Level, number> = { easy: 2, hard: 3 };
@@ -140,7 +140,7 @@ async function finishRound(pack: LanguagePack, object: LookalikeEntry): Promise<
     .querySelector('.play-stars')
     ?.replaceWith(buildStars(solvedRounds, ROUNDS_PER_SET));
   cheer(setFinished);
-  if (setFinished) markStarGameFinished('lookalike');
+  if (setFinished) finishRoundGame('lookalike', pack);
   await wait(CHEER_MS);
   const playbackId = beginPlayback();
   await speakPartsInOrder(

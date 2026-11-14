@@ -10,6 +10,7 @@ import { initHome } from './home';
 
 describe('home road', () => {
   beforeEach(() => {
+    localStorage.clear();
     document.body.innerHTML = '<div id="home" class="screen"></div>';
     navigateTo.mockClear();
     initHome();
@@ -66,5 +67,30 @@ describe('home road', () => {
     setLanguage('en');
     expect(document.querySelector('.stop-button[data-game="niqqud"]')).toBeNull();
     setLanguage('he');
+  });
+
+  it('does not mark a game as done just because it was opened', () => {
+    document.querySelector<HTMLButtonElement>('.stop-button[data-game="balls"]')!.click();
+    initHome();
+    expect(document.querySelector('.stop-button[data-game="balls"] .stop-check')).toBeNull();
+    expect(document.querySelector('.stop.has-guide .stop-button')!.getAttribute('data-game')).toBe(
+      'balls',
+    );
+  });
+
+  it('shows ✓ on finished games, moves the owl on, and counts the trophies', () => {
+    localStorage.setItem(
+      'learning-is-fun:progress-v2',
+      JSON.stringify({
+        trophies: 4,
+        games: { balls: { stars: [], finishes: 1, replayDay: '', replayRewards: 0 } },
+      }),
+    );
+    initHome();
+    expect(document.querySelector('.stop-button[data-game="balls"] .stop-check')).not.toBeNull();
+    expect(document.querySelector('.stop.has-guide .stop-button')!.getAttribute('data-game')).toBe(
+      'numbers',
+    );
+    expect(document.querySelector('.trophy-count')!.textContent).toBe('🏆 4');
   });
 });

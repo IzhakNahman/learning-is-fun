@@ -6,7 +6,9 @@ const { getCurrentScreen, navigateTo, registerScreen } = await import('./router'
 
 const SCREENS = [
   'home',
+  'balls',
   'numbers',
+  'teens',
   'colors',
   'shapes',
   'lookalike',

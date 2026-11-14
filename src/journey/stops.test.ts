@@ -20,12 +20,14 @@ describe('STOPS', () => {
 
   it('puts the games in order from easiest to hardest', () => {
     expect(STOPS.map((stop) => stop.game)).toEqual([
+      'balls',
       'numbers',
       'colors',
       'shapes',
       'lookalike',
       'letters',
       'count',
+      'teens',
       'trace',
       'mix',
       'words',
@@ -34,6 +36,11 @@ describe('STOPS', () => {
       'sky',
       'niqqud',
     ]);
+  });
+
+  it('gives every stop a ladder level from 1 to 5', () => {
+    const levels = STOPS.map((stop) => stop.level);
+    expect(levels.every((level) => level >= 1 && level <= 5)).toBe(true);
   });
 
   it('follows each language pack: Hebrew has niqqud, English does not', () => {

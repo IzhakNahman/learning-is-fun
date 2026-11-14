@@ -141,3 +141,28 @@ describe('recording display text', () => {
     expect(byId.get('letter-sound-alef')?.display).toBeUndefined();
   });
 });
+
+describe.each(LANGUAGE_ORDER)('%s find-the-shape objects', (code) => {
+  const pack = packs[code];
+
+  it('gives every shape that has objects at least two of them', () => {
+    const perShape = new Map<string, number>();
+    for (const entry of pack.lookalikes) {
+      perShape.set(entry.shapeId, (perShape.get(entry.shapeId) ?? 0) + 1);
+    }
+    for (const [shape, count] of perShape) expect(count, shape).toBeGreaterThanOrEqual(2);
+  });
+
+  it('only uses shapes the game knows', () => {
+    const shapes = new Set(pack.shapes.map((shape) => shape.id));
+    for (const entry of pack.lookalikes) expect(shapes.has(entry.shapeId), entry.id).toBe(true);
+  });
+
+  it('matches the objects the way they look on a phone (reviewed list)', () => {
+    const shapeOf = (id: string): string | undefined =>
+      pack.lookalikes.find((entry) => entry.id === id)?.shapeId;
+    expect(shapeOf('waffle')).toBe('circle');
+    expect(shapeOf('gift')).toBe('square');
+    expect(pack.lookalikes.some((entry) => entry.emoji === '💎')).toBe(false);
+  });
+});

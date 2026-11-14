@@ -61,7 +61,7 @@ export function niqqudSoundPart(entry: NiqqudEntry): SpokenPart {
   return { clipId: `niqqud-sound-${entry.id}`, speech: entry.soundSpeech };
 }
 
-export type PhraseWord = 'plus' | 'equals' | 'makes';
+export type PhraseWord = 'plus' | 'with' | 'equals' | 'makes';
 
 /** A little linking word, e.g. the "plus" in "two plus one equals three". */
 export function phraseWordPart(pack: LanguagePack, word: PhraseWord): SpokenPart {
@@ -70,7 +70,9 @@ export function phraseWordPart(pack: LanguagePack, word: PhraseWord): SpokenPart
 
 /** Games that start with an instruction line (their clip is `phrase-tap-<game>`). */
 export const INSTRUCTION_GAMES = [
+  'balls',
   'numbers',
+  'teens',
   'letters',
   'trace',
   'colors',
@@ -179,7 +181,7 @@ export function listRecordingItems(pack: LanguagePack): RecordingItem[] {
   const phraseParts = [
     wellDonePart(pack),
     guidePart(pack),
-    ...(['plus', 'equals', 'makes'] as const).map((word) => phraseWordPart(pack, word)),
+    ...(['plus', 'with', 'equals', 'makes'] as const).map((word) => phraseWordPart(pack, word)),
     ...INSTRUCTION_GAMES.filter((game) => pack.availableGames.includes(game)).map((game) =>
       instructionPart(pack, game),
     ),

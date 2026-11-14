@@ -15,14 +15,36 @@
   <body>
     <div id="home" class="screen"></div>
 
+    <div id="balls" class="screen pastel hidden">
+      <button class="homebtn" data-home>🏠</button>
+      <div class="balls-game">
+        <div class="balls-prompt" id="bprompt"></div>
+        <div class="balls-count" id="bcount"></div>
+        <div class="balls-board" id="bboard"></div>
+        <button class="count-aloud" id="bagain" hidden></button>
+      </div>
+    </div>
+    <div id="teens" class="screen pastel hidden">
+      <button class="homebtn" data-home>🏠</button>
+      <div class="split">
+        <div class="grid number-grid" id="tngrid"></div>
+        <div class="detail">
+          <div class="bignum" id="tnbig"></div>
+          <div class="nname" id="tnname"></div>
+          <div class="balls" id="tnballs"></div>
+          <button class="count-aloud" id="tnplay"></button>
+        </div>
+      </div>
+    </div>
     <div id="numbers" class="screen pastel hidden">
       <button class="homebtn" data-home>🏠</button>
       <div class="split">
-        <div class="grid" id="ngrid"></div>
+        <div class="grid number-grid" id="ngrid"></div>
         <div class="detail">
           <div class="bignum" id="nbig"></div>
           <div class="nname" id="nname"></div>
           <div class="balls" id="nballs"></div>
+          <button class="count-aloud" id="nplay"></button>
         </div>
       </div>
     </div>
@@ -35,6 +57,7 @@
           <div class="lbig" id="lbig"></div>
           <div class="lname" id="lname"></div>
           <div class="lsnd" id="lsnd"></div>
+          <button class="next-item" id="lnext"></button>
         </div>
       </div>
     </div>
@@ -131,7 +154,10 @@
       <div class="split">
         <div class="grid" id="qgrid"></div>
         <div class="detail">
-          <div class="lbig" id="qbig"></div>
+          <div class="niqqud-show">
+            <div class="mouth-face" id="qface"></div>
+            <div class="lbig" id="qbig"></div>
+          </div>
           <div class="lname" id="qname"></div>
           <div class="lsnd" id="qsound"></div>
         </div>

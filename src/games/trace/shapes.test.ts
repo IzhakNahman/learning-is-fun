@@ -128,3 +128,24 @@ describe('English shapes', () => {
     ]);
   });
 });
+
+describe('Hebrew basic-shape proportions', () => {
+  const length = (a: readonly number[], b: readonly number[]): number =>
+    Math.hypot((b[0] ?? 0) - (a[0] ?? 0), (b[1] ?? 0) - (a[1] ?? 0));
+  const families = hebrewTrace.families;
+
+  it('makes the ר shape’s top line as long as its line down', () => {
+    const [stroke] = families.find((family) => family.id === 'resh')!.basicShape.strokes;
+    const [start, corner, end] = stroke!;
+    const top = length(start!, corner!);
+    const down = length(corner!, end!);
+    expect(Math.abs(top - down) / down).toBeLessThanOrEqual(0.02);
+  });
+
+  it('gives the ו family a shorter top line than before (22 → 16)', () => {
+    const [stroke] = families.find((family) => family.id === 'vav')!.basicShape.strokes;
+    const [start, corner] = stroke!;
+    expect(length(start!, corner!)).toBeLessThan(22);
+    expect(length(start!, corner!)).toBeGreaterThan(12);
+  });
+});

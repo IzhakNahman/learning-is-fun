@@ -1,3 +1,4 @@
+import { finishRoundGame } from '../ui/progressUi';
 import { countingPart } from '../content';
 import type { LanguagePack } from '../content';
 import { byId, clearChildren, createElement, wait } from '../core/dom';
@@ -10,7 +11,6 @@ import { playCountBlip, playTryAgainSound } from '../core/sfx';
 import { SPEECH_RATE, speakPart } from '../core/voice';
 import { CHEER_MS, buildPrompt, buildStars, cheer, sayWellDone } from '../ui/playScreen';
 import { ROUNDS_PER_SET, finishedSet, levelFor } from './rounds';
-import { markStarGameFinished } from '../journey/played';
 import type { Level } from './rounds';
 
 const OBJECTS = ['🍎', '🎈', '⭐', '🐟', '🚗', '🌸', '🐥', '🍪'] as const;
@@ -134,7 +134,7 @@ async function finishRound(pack: LanguagePack): Promise<void> {
     .querySelector('.play-stars')
     ?.replaceWith(buildStars(solvedRounds, ROUNDS_PER_SET));
   cheer(setFinished);
-  if (setFinished) markStarGameFinished('count');
+  if (setFinished) finishRoundGame('count', pack);
   await wait(CHEER_MS);
   beginPlayback();
   await speakPart(countingPart(pack, round.count), SPEECH_RATE.DEFAULT);

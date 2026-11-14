@@ -15,6 +15,11 @@ export function beginPlayback(): number {
   return currentPlaybackId;
 }
 
+/** The id of the playback going on now (taken right after a game started speaking). */
+export function currentPlayback(): number {
+  return currentPlaybackId;
+}
+
 export function isCurrentPlayback(playbackId: number): boolean {
   return playbackId === currentPlaybackId;
 }

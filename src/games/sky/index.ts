@@ -52,6 +52,10 @@ import {
 import { createSkyRenderer } from './render';
 import type { SkyRenderer } from './render';
 import type { Box, SkyState } from './types';
+import { finishRoundGame } from '../../ui/progressUi';
+
+/** This many words or more in one game earn a bonus trophy. */
+const SKY_BONUS_WORDS = 3;
 
 const PAUSE_BEFORE_FINAL_MESSAGE_MS = 300;
 /** Longest the OK button waits for the voice, in case the device never reports that it finished. */
@@ -439,6 +443,8 @@ function finishGame(): void {
     );
     playCelebrationSound();
     void speakPartsInOrder(pack.gameOverParts(totalWords), beginPlayback(), SPEECH_RATE.END_COUNT);
+    // A game with at least one word is a finished game; 3 or more words earn a bonus trophy.
+    if (totalWords > 0) finishRoundGame('sky', pack, totalWords >= SKY_BONUS_WORDS ? 1 : 0);
   }
 
   async function countWord(countedSoFar: number): Promise<void> {

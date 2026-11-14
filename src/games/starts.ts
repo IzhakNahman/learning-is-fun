@@ -1,3 +1,4 @@
+import { finishRoundGame } from '../ui/progressUi';
 import { letterSoundPart, wordPart } from '../content';
 import type { LanguagePack, LetterEntry, WordEntry } from '../content';
 import { byId, clearChildren, createElement, wait } from '../core/dom';
@@ -10,7 +11,6 @@ import { playTryAgainSound } from '../core/sfx';
 import { SPEECH_RATE, speakPart, speakPartsInOrder } from '../core/voice';
 import { CHEER_MS, buildPrompt, buildStars, cheer, sayWellDone } from '../ui/playScreen';
 import { ROUNDS_PER_SET, finishedSet, levelFor } from './rounds';
-import { markStarGameFinished } from '../journey/played';
 import type { Level } from './rounds';
 
 const CHOICES_BY_LEVEL: Record<Level, number> = { easy: 3, hard: 4 };
@@ -126,7 +126,7 @@ async function finishRound(pack: LanguagePack, word: WordEntry): Promise<void> {
     .querySelector('.play-stars')
     ?.replaceWith(buildStars(solvedRounds, ROUNDS_PER_SET));
   cheer(setFinished);
-  if (setFinished) markStarGameFinished('starts');
+  if (setFinished) finishRoundGame('starts', pack);
   await wait(CHEER_MS);
   const playbackId = beginPlayback();
   const parts = [wordPart(pack, word.id), letterSoundPart(pack, word.startKey)];

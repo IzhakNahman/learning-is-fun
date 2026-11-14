@@ -8,6 +8,7 @@ import { getCurrentScreen, navigateTo, registerScreen } from './core/router';
 import { unlockAudio } from './core/sfx';
 import { unlockSpeech } from './core/speech';
 import { initAddGame } from './games/add';
+import { initBallsGame } from './games/balls';
 import { initColorsGame } from './games/colors';
 import { initCountGame } from './games/count';
 import { initLettersGame } from './games/letters';
@@ -25,6 +26,8 @@ import { initHome } from './ui/home';
 
 function registerServiceWorker(): void {
   if (!('serviceWorker' in navigator) || window.location.protocol === 'file:') return;
+  // While developing, the offline cache would keep showing old versions of the page.
+  if (import.meta.env.DEV) return;
   window.addEventListener('load', () => {
     try {
       navigator.serviceWorker.register('sw.js').catch(() => undefined);
@@ -38,6 +41,7 @@ function start(): void {
   initLanguage();
   initHome();
   initAbout();
+  initBallsGame();
   initNumbersGame();
   initLettersGame();
   initTraceGame();

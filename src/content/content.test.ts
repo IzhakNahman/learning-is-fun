@@ -112,7 +112,7 @@ describe.each(LANGUAGE_ORDER)('language pack "%s"', (code) => {
   it('offers niqqud in Hebrew only, and lists exactly the games it can play', () => {
     expect(pack.availableGames.includes('niqqud')).toBe(code === 'he');
     expect(pack.niqqud.length > 0).toBe(code === 'he');
-    expect(pack.availableGames).toHaveLength(code === 'he' ? 13 : 12);
+    expect(pack.availableGames).toHaveLength(code === 'he' ? 15 : 14);
     expect(new Set(pack.availableGames).size).toBe(pack.availableGames.length);
   });
 

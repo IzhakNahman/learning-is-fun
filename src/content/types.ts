@@ -1,6 +1,8 @@
 export type LanguageCode = 'he' | 'en';
 export type GameId =
+  | 'balls'
   | 'numbers'
+  | 'teens'
   | 'colors'
   | 'shapes'
   | 'lookalike'
@@ -130,10 +132,22 @@ export interface UiText {
   guide: { label: string; speech: string };
   /** Label of the button that scrolls the road back to the next game to play. */
   nextGame: string;
+  /** Stars, "play again" and trophies. */
+  progress: {
+    playAgain: string;
+    /** Label of the trophy counter on the home screen. */
+    trophies: string;
+    /** Shown when a replay earns no more trophies today. */
+    trophiesDoneToday: string;
+  };
   gameNames: Record<GameId, string>;
   /** How each game name is spoken (Hebrew: with niqqud). */
   gameNameSpeech: Record<GameId, string>;
   numbers: PromptText;
+  teens: PromptText;
+  balls: PromptText;
+  /** Label of the ▶ button that counts the balls out loud. */
+  countAloud: string;
   colors: PromptText;
   shapes: PromptText;
   lookalike: PromptText;
@@ -143,7 +157,8 @@ export interface UiText {
   add: PromptText;
   niqqud: PromptText;
   /** Little words the games string together: "red PLUS yellow MAKES orange". */
-  phrases: { plus: string; equals: string; makes: string };
+  /** Little linking words: "plus" for sums, "with" for mixing colours. */
+  phrases: { plus: string; with: string; equals: string; makes: string };
   letters: {
     placeholder: string;
     placeholderSpeech: string;

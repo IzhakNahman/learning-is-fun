@@ -5,7 +5,7 @@ import { getPack, onLanguageChange, setLanguage } from '../core/i18n';
 import { navigateTo, registerScreen } from '../core/router';
 import { findVoiceFor } from '../core/speech';
 import type { RoadOrientation } from '../journey/layout';
-import { isMarkedOnOpen, loadPlayedGames, markGamePlayed, nextGameToPlay } from '../journey/played';
+import { isFinished, loadProgress, nextGameToPlay } from '../journey/progress';
 import { STOPS, stopsFor } from '../journey/stops';
 import type { GameId } from '../content';
 import { openPolicy } from '../journey/unlock';
@@ -27,12 +27,8 @@ export function initHome(): void {
   renderHome(getPack());
 }
 
-/**
- * Opening a game without stars remembers it, so the road can show a ✓ and point at the next one.
- * A game with stars gets its ✓ only when the child finishes all the stars.
- */
+/** Opening a game does not mark it: it gets its ✓ only when the child finishes it. */
 function openGame(game: GameId): void {
-  if (isMarkedOnOpen(game)) markGamePlayed(game, STOPS);
   navigateTo(game);
 }
 
@@ -48,12 +44,17 @@ function renderHome(pack: LanguagePack): void {
   clearChildren(home);
 
   const orientation = currentOrientation();
-  const playedGames = loadPlayedGames(STOPS);
+  const progress = loadProgress();
+  const finishedGames = new Set(
+    STOPS.filter((stop) => isFinished(progress, stop.game)).map((stop) => stop.game),
+  );
+  const nextGame = nextGameToPlay(stopsFor(pack), progress);
   const road = buildRoad({
     pack,
     orientation,
     isUnlocked: unlockPolicy,
-    playedGames,
+    finishedGames,
+    nextGame,
     onOpen: openGame,
   });
   const voiceNote = createElement('div', { id: 'vnote' });
@@ -65,6 +66,7 @@ function renderHome(pack: LanguagePack): void {
       'div',
       { className: 'home-head' },
       createElement('h1', { text: pack.ui.appName }),
+      buildTrophyCount(pack, progress.trophies),
     ),
     road,
     buildBalloonLayer(pack, orientation),
@@ -76,9 +78,17 @@ function renderHome(pack: LanguagePack): void {
     ),
   );
 
-  setUpRoadScrolling(road, orientation, nextGameToPlay(stopsFor(pack), playedGames), pack);
+  setUpRoadScrolling(road, orientation, nextGame, pack);
   updateVoiceNote(voiceNote, pack);
   setTimeout(() => updateVoiceNote(voiceNote, pack), VOICE_CHECK_DELAY_MS);
+}
+
+/** 🏆 and the number of trophies collected (they can be spent in a shop later). */
+function buildTrophyCount(pack: LanguagePack, trophies: number): HTMLElement {
+  const count = createElement('div', { className: 'trophy-count', text: `🏆 ${trophies}` });
+  count.title = pack.ui.progress.trophies;
+  count.setAttribute('aria-label', `${pack.ui.progress.trophies}: ${trophies}`);
+  return count;
 }
 
 function buildLanguageSwitch(current: LanguagePack): HTMLElement {

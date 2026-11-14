@@ -4,6 +4,7 @@ import { byId, clearChildren, createElement, hide, show, wait } from '../core/do
 import { getPack, onLanguageChange } from '../core/i18n';
 import { beginPlayback, isCurrentPlayback } from '../core/playback';
 import { SPEECH_RATE, speakPartsInOrder } from '../core/voice';
+import { createStarTracker, markDoneAfterSpeech, type StarTracker } from '../ui/progressUi';
 
 const STEP_IDS = ['st1', 'st2', 'st3', 'st4'] as const;
 const PAUSE_BEFORE_NAME_MS = 250;
@@ -11,6 +12,7 @@ const PAUSE_BEFORE_SOUND_MS = 150;
 const PAUSE_BEFORE_WORD_MS = 200;
 
 let selectedWord: WordEntry | null = null;
+let tracker: StarTracker | null = null;
 
 export function initWordsGame(): void {
   onLanguageChange(renderWordsGame);
@@ -30,6 +32,7 @@ function renderWordsGame(pack: LanguagePack): void {
   closeWordDetail();
   const grid = byId('wgrid');
   clearChildren(grid);
+  const cards = new Map<string, HTMLElement>();
   for (const entry of pack.words) {
     const card = createElement(
       'button',
@@ -37,9 +40,22 @@ function renderWordsGame(pack: LanguagePack): void {
       createElement('span', { className: 'em', text: entry.emoji }),
       createElement('span', { text: entry.shown }),
     );
-    card.addEventListener('click', () => void playWordSequence(entry));
+    card.addEventListener(
+      'click',
+      () => void markDoneAfterSpeech(tracker, entry.id, pack, playWordSequence(entry)),
+    );
+    cards.set(entry.id, card);
     grid.append(card);
   }
+  tracker = createStarTracker({
+    game: 'words',
+    pack,
+    screen: byId('words'),
+    goal: cards.size,
+    tileFor: (id) => cards.get(id) ?? null,
+    itemIds: [...cards.keys()],
+    celebrateLater: true,
+  });
   const captions = [
     pack.ui.words.stepLetterName,
     pack.ui.words.stepLetter,

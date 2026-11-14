@@ -10,7 +10,6 @@ import {
   type Point,
   type RoadOrientation,
 } from '../journey/layout';
-import { nextGameToPlay } from '../journey/played';
 import { stopIcon, stopsFor, type StopDefinition } from '../journey/stops';
 import type { UnlockPolicy } from '../journey/unlock';
 import { buildGuide } from './guide';
@@ -65,14 +64,16 @@ export interface RoadOptions {
   pack: LanguagePack;
   orientation: RoadOrientation;
   isUnlocked: UnlockPolicy;
-  /** Games the child has already opened; they get a ✓. */
-  playedGames: ReadonlySet<GameId>;
+  /** Games the child has finished; they get a ✓. */
+  finishedGames: ReadonlySet<GameId>;
+  /** The first unfinished game: the owl guide stands next to it. */
+  nextGame: GameId | null;
   onOpen: (game: GameId) => void;
 }
 
 /** The scrollable sky world: sun, clouds, a wooden ladder and one button per stop. */
 export function buildRoad(options: RoadOptions): HTMLElement {
-  const { pack, orientation, isUnlocked, playedGames, onOpen } = options;
+  const { pack, orientation, isUnlocked, finishedGames, nextGame, onOpen } = options;
   const stops = stopsFor(pack);
   const points = layoutStops(stops.length, orientation, pack.dir === 'rtl');
   const scene = createElement('div', { className: `road-scene ${orientation}` });
@@ -85,14 +86,13 @@ export function buildRoad(options: RoadOptions): HTMLElement {
     buildMarker(markers.start, START_MARKER, 'start'),
     buildMarker(markers.finish, FINISH_MARKER, 'finish'),
   );
-  const guideGame = nextGameToPlay(stops, playedGames);
   stops.forEach((stop, index) => {
     const point = points[index];
     if (!point) return;
     const status = {
       unlocked: isUnlocked(index, stops),
-      played: playedGames.has(stop.game),
-      hasGuide: stop.game === guideGame,
+      played: finishedGames.has(stop.game),
+      hasGuide: stop.game === nextGame,
     };
     scene.append(buildStop(stop, point, status, pack, onOpen));
   });

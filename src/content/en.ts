@@ -249,8 +249,10 @@ const lookalikes: LookalikeEntry[] = [
   lookalike('ball', '⚽', 'circle', 'Ball'),
   lookalike('cookie', '🍪', 'circle', 'Cookie'),
   lookalike('moon', '🌕', 'circle', 'Moon'),
+  // The waffle emoji is drawn round on phones, so it belongs with the circle.
+  lookalike('waffle', '🧇', 'circle', 'Waffle'),
   lookalike('window', '🪟', 'square', 'Window'),
-  lookalike('waffle', '🧇', 'square', 'Waffle'),
+  lookalike('gift', '🎁', 'square', 'Gift'),
   lookalike('door', '🚪', 'rectangle', 'Door'),
   lookalike('phone', '📱', 'rectangle', 'Phone'),
   lookalike('chocolate', '🍫', 'rectangle', 'Chocolate bar'),
@@ -258,19 +260,22 @@ const lookalikes: LookalikeEntry[] = [
   lookalike('tent', '⛺', 'triangle', 'Tent'),
   lookalike('cheese', '🧀', 'triangle', 'Cheese'),
   lookalike('kite', '🪁', 'rhombus', 'Kite'),
-  lookalike('gem', '💎', 'rhombus', 'Gem'),
+  // 💎 is drawn as a cut gem, not a rhombus; 🔶 has the diamond shape itself.
+  lookalike('gem', '🔶', 'rhombus', 'Diamond'),
   lookalike('egg', '🥚', 'oval', 'Egg'),
   lookalike('avocado', '🥑', 'oval', 'Avocado'),
   lookalike('rugby', '🏉', 'oval', 'Rugby ball'),
 ];
 
 const AVAILABLE_GAMES: readonly GameId[] = [
+  'balls',
   'numbers',
   'colors',
   'shapes',
   'lookalike',
   'letters',
   'count',
+  'teens',
   'trace',
   'mix',
   'words',
@@ -280,7 +285,9 @@ const AVAILABLE_GAMES: readonly GameId[] = [
 ];
 
 const GAME_NAMES: Record<GameId, string> = {
-  numbers: 'Meet the Numbers',
+  balls: 'Count the Balls',
+  numbers: 'Numbers 1-10',
+  teens: 'Numbers 11-20',
   colors: 'Meet the Colours',
   shapes: 'Meet the Shapes',
   lookalike: 'Find the Shape',
@@ -303,8 +310,15 @@ const ui: UiText = {
   credit: 'Created by Izhak Nachman · All rights reserved ©',
   nextGame: 'Next game',
   gameNames: GAME_NAMES,
-  gameNameSpeech: GAME_NAMES,
+  gameNameSpeech: {
+    ...GAME_NAMES,
+    numbers: 'Numbers one to ten',
+    teens: 'Numbers eleven to twenty',
+  },
   numbers: { placeholder: 'Tap a number', placeholderSpeech: 'Tap a number' },
+  teens: { placeholder: 'Tap a number', placeholderSpeech: 'Tap a number' },
+  balls: { placeholder: 'Tap the balls and count', placeholderSpeech: 'Tap the balls and count' },
+  countAloud: 'Count out loud',
   colors: { placeholder: 'Tap a colour', placeholderSpeech: 'Tap a colour' },
   shapes: { placeholder: 'Tap a shape', placeholderSpeech: 'Tap a shape' },
   lookalike: {
@@ -316,8 +330,8 @@ const ui: UiText = {
     placeholderSpeech: 'Tap the right number, then tap the group',
   },
   mix: {
-    placeholder: 'Tap the colour you get, then tap the empty circle',
-    placeholderSpeech: 'Tap the colour you get, then tap the empty circle',
+    placeholder: 'Tap the colour you get, then tap the question mark',
+    placeholderSpeech: 'Tap the colour you get, then tap the question mark',
   },
   starts: {
     placeholder: 'Tap the picture, then tap the letter it starts with',
@@ -329,7 +343,7 @@ const ui: UiText = {
   },
   // Not shown in English (see GAME_NAMES).
   niqqud: { placeholder: 'Tap a vowel mark', placeholderSpeech: 'Tap a vowel mark' },
-  phrases: { plus: 'plus', equals: 'equals', makes: 'makes' },
+  phrases: { plus: 'plus', with: 'with', equals: 'equals', makes: 'makes' },
   letters: {
     placeholder: 'Tap a letter',
     placeholderSpeech: 'Tap a letter',
@@ -349,6 +363,11 @@ const ui: UiText = {
     stepLetter: 'Letter',
     stepSound: 'Sound',
     stepWord: 'Word',
+  },
+  progress: {
+    playAgain: 'Play again',
+    trophies: 'Trophies',
+    trophiesDoneToday: 'You already got today’s trophies in this game. Well done!',
   },
   sky: {
     quit: '✖ Finish',
@@ -371,9 +390,19 @@ const ui: UiText = {
       '"My First Step" is a set of short games for young children, with no sign-up and no data saved. The games teach letters, sounds, numbers and counting, and practise using both hands the way real video games do. You can switch between Hebrew and English with the language button on the home screen.',
     sections: [
       {
+        icon: '🔵',
+        game: 'balls',
+        body: 'Ten balls. The child taps each ball and the voice counts along: one, two, three… When all the balls are lit, the game is finished.',
+      },
+      {
+        icon: '🔢',
+        game: 'teens',
+        body: 'The numbers 11-20, like the first numbers game: tap a number, see how many balls it is, and tap ▶ to count them out loud.',
+      },
+      {
         icon: '🔢',
         game: 'numbers',
-        body: 'Children get to know the numbers 1–20: how they look, how they sound and how they are written as words. Colourful balls in rows of five show the quantity itself, and counting out loud links the symbol, the name and the amount.',
+        body: 'Children get to know the numbers 1-10: how they look, how they sound and how they are written as words. Colourful balls in rows of five show the quantity itself, and tapping ▶ counts them out loud, linking the symbol, the name and the amount.',
       },
       {
         icon: 'A',
@@ -393,7 +422,7 @@ const ui: UiText = {
       {
         icon: '🌈',
         game: 'mix',
-        body: 'Two colours appear on one side of the board and the child taps the colour you get when they are mixed, then the empty circle (for example red plus yellow makes orange).',
+        body: 'Two colour circles overlap, and where they meet there is a question mark. The child taps the colour you get when they are mixed, then the question mark (for example red with yellow makes orange).',
       },
       {
         icon: '🎨',

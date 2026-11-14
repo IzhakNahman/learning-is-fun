@@ -16,6 +16,8 @@ import { ADDITION_COLOR, DRAWING_BOX } from './shapes';
 import type { LetterShape, Point, TraceFamily, TraceSet } from './shapes';
 import { englishTrace } from './shapes.en';
 import { hebrewTrace } from './shapes.he';
+import { isFinished, loadProgress, recordFinish } from '../../journey/progress';
+import { finishRoundGame } from '../../ui/progressUi';
 
 const PAUSE_BETWEEN_NAME_AND_SOUND_MS = 200;
 const PAUSE_AFTER_WIN_SOUND_MS = 150;
@@ -79,18 +81,19 @@ function currentSet(pack: LanguagePack): TraceSet {
 }
 
 /** Progress key: a letter's own key, or "basic:<group id>" for a group's basic shape. */
-function progressKey(family: TraceFamily, itemKey: string): string {
+export function progressKey(family: TraceFamily, itemKey: string): string {
   return itemKey === BASIC_KEY ? `${BASIC_KEY}:${family.id}` : itemKey;
 }
 
 /** The items of a group in order: the basic shape first, then its letters. */
-function itemsOf(family: TraceFamily): string[] {
+export function itemsOf(family: TraceFamily): string[] {
   return [BASIC_KEY, ...family.letters];
 }
 
 function renderTraceGame(pack: LanguagePack): void {
   familyIndex = 0;
   completed = loadCompleted(pack);
+  recordGroupsWrittenEarlier(pack);
   renderControls(pack);
   showNothingSelected(pack);
 }
@@ -128,7 +131,7 @@ function renderItemTiles(pack: LanguagePack): void {
   for (const itemKey of itemsOf(family)) {
     const classes = ['tile'];
     if (itemKey === BASIC_KEY) classes.push('basic');
-    if (completed.has(progressKey(family, itemKey))) classes.push('done');
+    if (completed.has(progressKey(family, itemKey))) classes.push('done', 'starred');
     if (active?.itemKey === itemKey) classes.push('sel');
     const tile = createElement('button', { className: classes.join(' ') });
     if (itemKey === BASIC_KEY) tile.append(shapeIcon(family.basicShape, family.color));
@@ -308,10 +311,38 @@ function finishStroke(item: ActiveItem): void {
   else draw();
 }
 
+/**
+ * Groups written before stars existed were saved here but never counted as a finish: count one
+ * now (quietly, without a pop-up), so the road shows the ✓ the child already earned.
+ */
+function recordGroupsWrittenEarlier(pack: LanguagePack): void {
+  if (isFinished(loadProgress(), 'trace')) return;
+  if (!currentSet(pack).families.some((family) => isFamilyDone(family, completed))) return;
+  recordFinish('trace');
+}
+
+/** True when every item of the group (its basic shape and all its letters) is written. */
+export function isFamilyDone(family: TraceFamily, done: ReadonlySet<string>): boolean {
+  return itemsOf(family).every((itemKey) => done.has(progressKey(family, itemKey)));
+}
+
+/** True when writing `itemKey` is what completes its group (so the game is finished now). */
+export function completesFamily(
+  family: TraceFamily,
+  itemKey: string,
+  doneBefore: ReadonlySet<string>,
+): boolean {
+  if (isFamilyDone(family, doneBefore)) return false;
+  return isFamilyDone(family, new Set([...doneBefore, progressKey(family, itemKey)]));
+}
+
 function finishItem(item: ActiveItem): void {
   const pack = getPack();
   item.finished = true;
+  const finishesGroup = completesFamily(item.family, item.itemKey, completed);
   completed.add(progressKey(item.family, item.itemKey));
+  // Writing a whole group finishes the game (each new group counts as another finish).
+  if (finishesGroup) finishRoundGame('trace', pack);
   writeSetting(storageKey(pack), [...completed].join(','));
   renderItemTiles(pack);
   draw();

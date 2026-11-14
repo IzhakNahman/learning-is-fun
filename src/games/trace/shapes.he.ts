@@ -7,15 +7,17 @@ import type { Point, Stroke, TraceSet } from './shapes';
  * to right; the only exception is the bottom of the family-4 basic shape.
  */
 
-/** Family 1: a long top line, then down. */
+/** Left edge of the family-1 letters: the top line is as long as the line down (50 each). */
+const RESH_LEFT = 25;
+/** Family 1: a top line, then down, both the same length. */
 const RESH: Stroke = [
-  [15, 25],
+  [RESH_LEFT, 25],
   [75, 25],
   [75, 75],
 ];
 /** Family 2: a short top line, then down. */
 const VAV: Stroke = [
-  [38, 25],
+  [44, 25],
   [60, 25],
   [60, 75],
 ];
@@ -36,9 +38,9 @@ const NUN: Stroke = [
 ];
 /** The little curl of פ and ף: down from the top-left corner, then right. */
 const CURL: Stroke = [
-  [15, 25],
-  [15, 46],
-  [37, 46],
+  [RESH_LEFT, 25],
+  [RESH_LEFT, 46],
+  [45, 46],
 ];
 
 const line = (...points: Point[]): Stroke => points;
@@ -48,21 +50,21 @@ export const hebrewTrace: TraceSet = {
     // Family 1
     ר: shape(1, RESH),
     ד: shape(1, RESH, line([75, 25], [87, 25])),
-    ה: shape(1, RESH, line([15, 42], [15, 75])),
-    ח: shape(1, RESH, line([15, 25], [15, 75])),
-    ת: shape(1, RESH, line([15, 25], [15, 75]), line([6, 75], [15, 75])),
-    ב: shape(1, RESH, line([15, 75], [87, 75])),
-    כ: shape(1, RESH, line([15, 75], [75, 75])),
-    ל: shape(1, RESH, line([15, -4], [15, 25])),
-    ס: shape(1, RESH, arc(75, 25, 60, 50, 180, 90)),
-    ק: shape(1, RESH, line([38, 45], [38, 100])),
-    פ: shape(1, RESH, line([15, 75], [75, 75]), CURL),
+    ה: shape(1, RESH, line([RESH_LEFT, 42], [RESH_LEFT, 75])),
+    ח: shape(1, RESH, line([RESH_LEFT, 25], [RESH_LEFT, 75])),
+    ת: shape(1, RESH, line([RESH_LEFT, 25], [RESH_LEFT, 75]), line([16, 75], [RESH_LEFT, 75])),
+    ב: shape(1, RESH, line([RESH_LEFT, 75], [87, 75])),
+    כ: shape(1, RESH, line([RESH_LEFT, 75], [75, 75])),
+    ל: shape(1, RESH, line([RESH_LEFT, -4], [RESH_LEFT, 25])),
+    ס: shape(1, RESH, arc(75, 25, 50, 50, 180, 90)),
+    ק: shape(1, RESH, line([44, 45], [44, 100])),
+    פ: shape(1, RESH, line([RESH_LEFT, 75], [75, 75]), CURL),
     ך: shape(1, RESH, line([75, 75], [75, 100])),
-    ם: shape(1, RESH, line([15, 25], [15, 75], [75, 75])),
+    ם: shape(1, RESH, line([RESH_LEFT, 25], [RESH_LEFT, 75], [75, 75])),
     ף: shape(1, RESH, line([75, 75], [75, 100]), CURL),
     // Family 2
     ו: shape(1, VAV),
-    י: shape(1, line([38, 25], [60, 25], [60, 45])),
+    י: shape(1, line([44, 25], [60, 25], [60, 45])),
     ז: shape(1, VAV, line([60, 25], [78, 25])),
     ן: shape(1, VAV, line([60, 75], [60, 100])),
     ג: shape(1, VAV, line([35, 50], [60, 50]), line([35, 50], [35, 75])),

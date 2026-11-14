@@ -1,6 +1,8 @@
+import { finishRoundGame } from '../ui/progressUi';
 import { colorNamePart, phraseWordPart } from '../content';
 import type { ColorEntry, LanguagePack, SpokenPart } from '../content';
 import { byId, clearChildren, createElement, wait } from '../core/dom';
+import { svgElement } from '../core/svg';
 import { makeDraggable } from '../core/drag';
 import { getPack, onLanguageChange } from '../core/i18n';
 import { beginPlayback } from '../core/playback';
@@ -10,7 +12,6 @@ import { playTryAgainSound } from '../core/sfx';
 import { SPEECH_RATE, speakPart, speakPartsInOrder } from '../core/voice';
 import { CHEER_MS, buildPrompt, buildStars, cheer, sayWellDone } from '../ui/playScreen';
 import { ROUNDS_PER_SET, finishedSet, levelFor } from './rounds';
-import { markStarGameFinished } from '../journey/played';
 import type { Level } from './rounds';
 
 /** Colour ids (see the colour lists in the language packs) that make a new colour when mixed. */
@@ -89,13 +90,92 @@ function swatch(color: ColorEntry, className: string): HTMLElement {
   return element;
 }
 
-/** "red plus yellow" */
+/** "red with yellow" */
 function askParts(pack: LanguagePack, recipe: MixRecipe): SpokenPart[] {
   return [
     colorNamePart(findColor(pack, recipe.first)),
-    phraseWordPart(pack, 'plus'),
+    phraseWordPart(pack, 'with'),
     colorNamePart(findColor(pack, recipe.second)),
   ];
+}
+
+/**
+ * The two overlapping circles, drawn in SVG (160 x 100 units) so the overlap is exactly where
+ * the circles meet: the right circle, cut by the left one. Both outlines are drawn on top.
+ */
+const VENN = { radius: 46, leftX: 50, rightX: 110, y: 50, width: 160, height: 100 } as const;
+const LENS_CLIP_ID = 'mix-lens-clip';
+const LENS_STRIPES_ID = 'mix-lens-stripes';
+const OUTLINE = 'rgba(0, 0, 0, 0.18)';
+
+interface VennDrawing {
+  svg: SVGSVGElement;
+  /** The overlap: filled with stripes, then with the mixed colour. */
+  lens: SVGCircleElement;
+  mark: SVGTextElement;
+}
+
+function buildVenn(left: ColorEntry, right: ColorEntry): VennDrawing {
+  const { radius, leftX, rightX, y, width, height } = VENN;
+  const svg = svgElement('svg', {
+    class: 'mix-venn-svg',
+    viewBox: `0 0 ${width} ${height}`,
+    role: 'img',
+    'aria-label': `${left.name} + ${right.name}`,
+  });
+  const clip = svgElement('clipPath', { id: LENS_CLIP_ID });
+  clip.append(svgElement('circle', { cx: String(leftX), cy: String(y), r: String(radius) }));
+  const stripes = svgElement('pattern', {
+    id: LENS_STRIPES_ID,
+    width: '8',
+    height: '8',
+    patternUnits: 'userSpaceOnUse',
+    patternTransform: 'rotate(45)',
+  });
+  stripes.append(
+    svgElement('rect', { width: '8', height: '8', fill: '#eaf2ff' }),
+    svgElement('rect', { width: '4', height: '8', fill: '#cfe0fa' }),
+  );
+  const defs = svgElement('defs', {});
+  defs.append(clip, stripes);
+
+  const disc = (x: number, fill: string): SVGCircleElement =>
+    svgElement('circle', { cx: String(x), cy: String(y), r: String(radius), fill });
+  const outline = (x: number): SVGCircleElement =>
+    svgElement('circle', {
+      cx: String(x),
+      cy: String(y),
+      r: String(radius),
+      fill: 'none',
+      stroke: OUTLINE,
+      'stroke-width': '2.5',
+    });
+  const lens = svgElement('circle', {
+    class: 'mix-lens',
+    cx: String(rightX),
+    cy: String(y),
+    r: String(radius),
+    fill: `url(#${LENS_STRIPES_ID})`,
+    'clip-path': `url(#${LENS_CLIP_ID})`,
+  });
+  const mark = svgElement('text', {
+    class: 'mix-lens-mark',
+    x: String((leftX + rightX) / 2),
+    y: String(y),
+    'text-anchor': 'middle',
+    'dominant-baseline': 'central',
+  });
+  mark.textContent = '?';
+  svg.append(
+    defs,
+    disc(leftX, left.hex),
+    disc(rightX, right.hex),
+    lens,
+    outline(leftX),
+    outline(rightX),
+    mark,
+  );
+  return { svg, lens, mark };
 }
 
 function renderRound(pack: LanguagePack, current: MixRound): void {
@@ -105,25 +185,18 @@ function renderRound(pack: LanguagePack, current: MixRound): void {
   const root = byId('mixplay');
   clearChildren(root);
 
-  const slot = createElement('div', { className: 'mix-slot', text: '?' });
-  const left = createElement(
-    'div',
-    { className: 'mix-side' },
-    swatch(first, 'fixed'),
-    createElement('span', { className: 'mix-plus', text: '+' }),
-    swatch(second, 'fixed'),
-  );
-  left.addEventListener(
+  // Two colour circles that overlap; the overlap shows "?" and the mixed colour goes there.
+  // The first colour is read first: on the right in Hebrew, on the left in English.
+  const [leftColor, rightColor] = pack.dir === 'rtl' ? [second, first] : [first, second];
+  const drawing = buildVenn(leftColor, rightColor);
+  // An invisible oval over the overlap is what the child drops on (or taps); it shows the ring.
+  const target = createElement('div', { className: 'mix-lens-target' });
+  const venn = createElement('div', { className: 'mix-venn' }, drawing.svg, target);
+  venn.addEventListener(
     'click',
     () => void speakPartsInOrder(askParts(pack, recipe), beginPlayback(), SPEECH_RATE.DEFAULT),
   );
-  const board = createElement(
-    'div',
-    { className: 'mix-board' },
-    left,
-    createElement('div', { className: 'mix-line' }),
-    createElement('div', { className: 'mix-side' }, slot),
-  );
+  const board = createElement('div', { className: 'mix-board' }, venn);
 
   const choices = createElement('div', { className: 'play-choices' });
   for (const id of current.choices) {
@@ -131,8 +204,8 @@ function renderRound(pack: LanguagePack, current: MixRound): void {
     const dot = swatch(color, 'choice');
     dot.dataset.color = id;
     makeDraggable(dot, {
-      targets: () => [slot],
-      onDrop: () => onColorDropped(pack, recipe, color, slot),
+      targets: () => [target],
+      onDrop: () => onColorDropped(pack, recipe, color, drawing),
       onReject: () => onWrong(choices, recipe),
       onTap: () => void speakPart(colorNamePart(color), SPEECH_RATE.DEFAULT),
     });
@@ -146,13 +219,13 @@ function onColorDropped(
   pack: LanguagePack,
   recipe: MixRecipe,
   color: ColorEntry,
-  slot: HTMLElement,
+  drawing: VennDrawing,
 ): boolean {
   if (busy || color.id !== recipe.result) return false;
   busy = true;
-  slot.textContent = '';
-  slot.style.background = color.hex;
-  slot.classList.add('done');
+  drawing.mark.remove();
+  drawing.lens.setAttribute('fill', color.hex);
+  drawing.lens.classList.add('done');
   byId('mixplay').querySelector(`.choice[data-color="${color.id}"]`)?.classList.add('placed');
   solvedRounds += 1;
   void finishRound(pack, recipe, color);
@@ -169,7 +242,7 @@ async function finishRound(
     .querySelector('.play-stars')
     ?.replaceWith(buildStars(solvedRounds, ROUNDS_PER_SET));
   cheer(setFinished);
-  if (setFinished) markStarGameFinished('mix');
+  if (setFinished) finishRoundGame('mix', pack);
   await wait(CHEER_MS);
   const playbackId = beginPlayback();
   await speakPartsInOrder(

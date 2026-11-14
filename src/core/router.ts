@@ -11,7 +11,9 @@ export interface ScreenHooks {
 
 const SCREEN_IDS: readonly ScreenId[] = [
   'home',
+  'balls',
   'numbers',
+  'teens',
   'colors',
   'shapes',
   'lookalike',
